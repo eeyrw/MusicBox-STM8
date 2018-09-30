@@ -21,11 +21,6 @@ WAVETABLE_LEN=1758
 WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
 .area DATA
-; "General registers"
- _RU8:
-    .ds 8
- _RU16:
-    .ds 8
 
 _lastSoundUnitOffest:
 	.dw 0
@@ -102,7 +97,6 @@ _NoteOn:
 
 	cpw x,POLY_NUM*SoundUnitSize
 	jrc branch_NoteOn1$
-branch_NoteOn0$:
 	ldw y,_lastSoundUnitOffest
 	addw y,#SoundUnitSize
 	jra branchEnd_NoteOn1$
