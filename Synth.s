@@ -1,5 +1,5 @@
 .module SYNTH
-
+.globl _Synth
 ;typedef struct _SoundUnit
 ;{
 ;	uint16_t increment;
