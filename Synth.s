@@ -6,13 +6,15 @@
 ;	uint16_t wavetablePos;
 ;	uint8_t envelopeLevel;
 ;	uint8_t envelopePos;
+;	int16_t val;
 ;} SoundUnit;
 
-SoundUnitSize=6
+SoundUnitSize=8
 pIncrement=0
 pWavetablePos=2
 pEnvelopeLevel=4
 pEnvelopePos=5
+pVal=6
 
 ENVELOP_LEN=128
 POLY_NUM=5
@@ -22,8 +24,6 @@ WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
 .area DATA
 
-_lastSoundUnitOffest:
-	.dw 0
 
 .area CODE
 
@@ -44,65 +44,66 @@ loopSynth$:
 	
 	ldw x,y				; Read wavetablePos of sound unit to reg x.
     ldw x,(pWavetablePos,x);
+	pushw x
 	
-	addw x,(3,sp) 		; Do calculation :[pWavetablePos]+=[pIncrement], (3,sp) is always the latest element in stack
-	addw sp,#2 			; Pop the temporal variable
+	addw x,(3,sp) 		; Do calculation :[pWavetablePos]+=[pIncrement], (1,sp) is always the latest element in stack
 
-	cpw x,WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
-	jrc branch0$			; Jump if WAVETABLE_LEN is great than x
-	subw x,WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
-branch0$:
-	pushw x 				;Save wavetablePos
+branch0_start$:
+	cpw x,#WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
+	jrc branch0_end$			; Jump if WAVETABLE_LEN is great than x
+	subw x,#WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
+branch0_end$:
+	ldw (pWavetablePos,y),x ; Save wavetablePos to mem
 	
 	
 	ldw x,#_WaveTable	; Load base address of WaveTable to x
-	addw x,(3,sp)		; Calculate sample address with saved wavetablePos
-	addw sp,#2 ;		; Pop the temporal variable
+	addw x,(1,sp)		; Calculate sample address with saved wavetablePos
+	addw sp,#4 ;		; Pop the temporal variable
 	
 	push a 				; Save register A
 	ld a,(x)			; Load sample to A
-	ldw x,y				; Read envelopeLevel of sound unit to reg x.
-    ldw x,(pEnvelopeLevel,x);
-	mul x,a				; Mutiple envelopeLevel with sample
-	pop a				; Pop A
-	
-	addw x,(3,sp)		; Add sum of accumlator in stack to x
-	ldw (3,sp),x		; Save x to stack
-	
 
+	rlc a		;Get signed bit
+	ld a,(x);	;Reload a
+
+	push a					; Load evnvlopelevel to xl
+    ld a,(pEnvelopeLevel,y); 
+	ld xl,a
+	pop a
+
+
+	
+	jrnc branch1_end$	; Do signed mutiple with unsigned MUL
+	neg a				;
+	mul x,a				; Mutiple envelopeLevel with sample
+	negw x
+	scf	; Set C=1
+branch1_end$:	
+	jrc branch2_end$
+	mul x,a
+branch2_end$:
+
+
+
+	pop a					; Pop A
+
+
+
+	ldw (pVal,y),x ; Save wavetablePos to mem
+	;addw x,(1,sp)		; Add sum of accumlator in stack to x
+	;ldw (1,sp),x		; Save x to stack
 
     inc a
-	addw y,SoundUnitSize
-    jra loopSynth$
-loopSynth_end$:
-addw sp,#2 ;
-    ret
-
-_NoteOn:
-	ldw x,#_PitchIncrementTable		; Load pitch increment table to register X.
-	addw x,(3,sp)					; Get address by argument uint8_t note
-	ldw x,(x)						; Load value
-	ldw y, x						; Save value for further use
-
-	ldw x,#_Sounds 		; Load sound unit pointer to register X.
-	addw x,_lastSoundUnitOffest
-	ldw (pIncrement,x),y ;Save value to mem
-	ld a,#0
-	ld (pEnvelopePos,x),a ;Set envlope pos to 0
-	ld a,#0xff
-	ld (pEnvelopeLevel,x),a ;Set envlope level to 255
-
-	ldw x,_lastSoundUnitOffest
-	addw x,#SoundUnitSize
-
-	cpw x,POLY_NUM*SoundUnitSize
-	jrc branch_NoteOn1$
-	ldw y,_lastSoundUnitOffest
 	addw y,#SoundUnitSize
-	jra branchEnd_NoteOn1$
-branch_NoteOn1$:
-	clrw y
-	ldw _lastSoundUnitOffest,y
-branchEnd_NoteOn1$:	
-	ret
+    jra loopSynth$
+
+loopSynth_end$:
+	;ldw x,(1,sp)
+	;ldw y,#_mixOutAsm
+	;ldw (y),x
+	addw sp,#2 ;
+
+
+		ret
+
 

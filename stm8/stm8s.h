@@ -254,6 +254,16 @@
 #define TIM2_CCR3H              _SFR_(0x315)
 #define TIM2_CCR3L              _SFR_(0x316)
 
+
+#define TIM2_CR1_ARPE     7  // Auto-reload preload enable
+#define TIM2_CR1_OPM      3  // One pulse mode
+#define TIM2_CR1_CEN      0  // Counter enable bit (0 - disable, 1 - enable)
+#define TIM2_EGR_UG       0
+#define TIM2_SR1_UIF      0 // Update Interrupt flag bit
+#define TIM2_IER_UIE      0 // Update interrupt enable bit
+#define TIM2_CCER1_CC1P   1 // Capture/compare 1 output polarity
+#define TIM2_CCER1_CC1E   0 // Capture/compare 1 output enable
+
 /* TIM4 */
 #define TIM4_CR1                _SFR_(0x340)
 #define TIM4_CR1_ARPE           7

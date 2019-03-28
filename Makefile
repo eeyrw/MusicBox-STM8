@@ -46,7 +46,7 @@ size:
 ##@stat -L -c %s $(TARGET).bin
 
 flash: $(TARGET)
-	stm8flash -c stlinkv2 -p $(MCU) -w $(TARGET)
+	./stm8flash -c stlinkv2 -p $(MCU) -w $(TARGET)
 
 clean:
 	rm -f *.map *.asm *.rel *.ihx *.o *.sym *.lk *.lst *.rst *.cdb *.bin
