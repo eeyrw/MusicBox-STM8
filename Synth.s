@@ -28,6 +28,11 @@ WAVETABLE_ATTACK_LEN=1630
 WAVETABLE_LEN=1758
 WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
+
+REG_TIM2_CCR2L=0x314;
+REG_TIM2_CCR3L=0x316;
+
+
 .area DATA
 
 
@@ -105,17 +110,13 @@ branch_lt_253$:
 	ldw x,#-255
 branch_lt_gt_end$:	
 
-	;sraw x
-	;ror	T2H			;
-	;mov	EL, T2L			;
-	;subi	EL, 0x80		;
-	;mov	EH, EL			;
-	;com	EH			;
-	;sbrc	T2H, 7			;
-	;inc	EL			;
-	;sts OCR1AL,EL
-	;sts OCR1BL,EH
+	sraw x
+	ld a,xl
+	sub a,#0x80
+	ld REG_TIM2_CCR2L,a
+	cpl a
+	ld REG_TIM2_CCR3L,a	
 
-		ret
+	ret
 
 

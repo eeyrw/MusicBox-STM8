@@ -56,7 +56,7 @@ void NoteOn(uint8_t note)
 disable_interrupts();
 	Sounds[lastSoundUnit].increment = PitchIncrementTable[note];
 	Sounds[lastSoundUnit].envelopePos = 0;
-	Sounds[lastSoundUnit].envelopeLevel = 255;
+	Sounds[lastSoundUnit].envelopeLevel = EnvelopeTable[0];
 enable_interrupts();
 	if (lastSoundUnit + 1 == POLY_NUM)
 		lastSoundUnit = 0;
@@ -85,12 +85,14 @@ void InitSound()
 		SoundsC[i].increment = 0;
 		SoundsC[i].envelopePos = 0;
 		SoundsC[i].envelopeLevel = 255;
-		//SoundsC[i].wavetablePos_byte0 = 0;
+		SoundsC[i].wavetablePos_frac = 0;
+		SoundsC[i].wavetablePos_int = 0;
 
 		Sounds[i].increment = 0;
 		Sounds[i].envelopePos = 0;
 		Sounds[i].envelopeLevel = 255;
-		//Sounds[i].wavetablePos_byte0 = 0;
+		Sounds[i].wavetablePos_frac = 0;
+		Sounds[i].wavetablePos_int = 0;
 	}
 }
 
@@ -117,22 +119,22 @@ int16_t SynthC()
 
 void GenDecayEnvlope()
 {
-	// static uint8_t TimeCnt = 0;
-	// if (TimeCnt != 30)
-	// 	TimeCnt++;
-	// else
-	// {
-	// 	TimeCnt = 0;
-	// 	for (uint8_t i = 0; i < POLY_NUM; i++)
-	// 	{
-	// 		if (Sounds[i].wavetablePos_byte0 >= WAVETABLE_ATTACK_LEN &&
-	// 			Sounds[i].envelopePos < sizeof(EnvelopeTable)-1)
-	// 		{
-	// 			Sounds[i].envelopeLevel = EnvelopeTable[Sounds[i].envelopePos];
-	// 			Sounds[i].envelopePos += 1;
-	// 		}
-	// 	}
-	// }
+	static uint8_t TimeCnt = 0;
+	if (TimeCnt != 30)
+		TimeCnt++;
+	else
+	{
+		TimeCnt = 0;
+		for (uint8_t i = 0; i < POLY_NUM; i++)
+		{
+			if (Sounds[i].wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
+				Sounds[i].envelopePos < sizeof(EnvelopeTable)-1)
+			{
+				Sounds[i].envelopeLevel = EnvelopeTable[Sounds[i].envelopePos];
+				Sounds[i].envelopePos += 1;
+			}
+		}
+	}
 }
 
 extern void Synth(void);
@@ -146,21 +148,16 @@ void timer_isr() __interrupt(TIM4_ISR)
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
 	Synth();
-	mix32=0;
-	for (uint8_t i = 0; i < POLY_NUM; i++)
-	{
-		mix32+=Sounds[i].val;
-	}
-	GenDecayEnvlope();
+	//mix32=0;
+	// for (uint8_t i = 0; i < POLY_NUM; i++)
+	// {
+	// 	mix32+=Sounds[i].val;
+	// }
 
-		TIM2_CCR3L=(mix32+32767)>>8;
+
+		//TIM2_CCR3L=(mix32+32767)>>8;
 	
 MEASURE_E;
-	//TIM2_CCR3L=WaveTable[wtCnt]+127;
-	//if(wtCnt<WAVETABLE_LEN-1)
-	//	wtCnt++;
-	//else
-	//	wtCnt=0;
 }
 
 /*
@@ -172,10 +169,6 @@ int putchar(int c)
 	return 0;
 }
 
-int32_t add32(int16_t a,int32_t b)
-{
-	return a+b;
-}
 
 /*
  * Redirect stdin to UART
@@ -185,16 +178,8 @@ int getchar()
 	return uart_read();
 }
 
-int16_t mul(uint16_t a, int8_t b)
-{
-	return a * b;
-}
-
 void main()
 {
-	int16_t aa;
-	int8_t bb;
-int32_t ccd;
 	CLK_CKDIVR = 0x00;
 	uart_init();
 
@@ -222,7 +207,13 @@ int32_t ccd;
    TIM2_CCMR3 |=   0X70;   //设置定时器2三通道(PD2)输出比较三模式
     TIM2_CCMR3 |= 0X04;     //输出比较3预装载使能
 
-    TIM2_CCER2 |= 0x03;     //通道3使能，低电平有效，配置为输出
+
+   TIM2_CCMR2 |=   0X70;   //设置定时器2二通道(PD3)输出比较三模式
+    TIM2_CCMR2 |= 0X04;     //输出比较3预装载使能
+
+
+    TIM2_CCER1 |= (0x03<<4);     //通道2使能，低电平有效，配置为输出
+	TIM2_CCER2 |= 0x03;     //通道3使能，低电平有效，配置为输出
 
     //初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
     TIM2_PSCR = 0X00;   
@@ -232,7 +223,8 @@ int32_t ccd;
     //初始化比较寄存器，决定PWM 方波的占空比：5000/10000 = 50%
     TIM2_CCR3H = 0;
     TIM2_CCR3L = 10;
-
+    TIM2_CCR2H = 0;
+    TIM2_CCR2L = 10;
 
     // 启动计数;更新中断失能
 
@@ -269,7 +261,6 @@ int32_t ccd;
 	// }
 
 	
-	ccd=add32(324,6);
 
 	while (1)
 	{
