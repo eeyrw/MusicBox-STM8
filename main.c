@@ -16,7 +16,8 @@ extern int8_t WaveTable[];
 typedef struct _SoundUnit
 {
 	uint16_t increment;
-	uint16_t wavetablePos;
+	uint8_t  wavetablePos_frac;
+	uint16_t  wavetablePos_int;
 	uint8_t envelopeLevel;
 	uint8_t envelopePos;
 	int16_t val;
@@ -84,48 +85,54 @@ void InitSound()
 		SoundsC[i].increment = 0;
 		SoundsC[i].envelopePos = 0;
 		SoundsC[i].envelopeLevel = 255;
-		SoundsC[i].wavetablePos = 0;
+		//SoundsC[i].wavetablePos_byte0 = 0;
 
 		Sounds[i].increment = 0;
 		Sounds[i].envelopePos = 0;
 		Sounds[i].envelopeLevel = 255;
-		Sounds[i].wavetablePos = 0;
+		//Sounds[i].wavetablePos_byte0 = 0;
 	}
 }
 
 int16_t SynthC()
 {
-	mixOutC = 0;
-	for (uint8_t i = 0; i < POLY_NUM; i++)
-	{
-		SoundsC[i].wavetablePos += SoundsC[i].increment;
-		if (SoundsC[i].wavetablePos >= WAVETABLE_LEN)
-		{
-			SoundsC[i].wavetablePos -= WAVETABLE_LOOP_LEN;
-		}
-		mixOutC += (SoundsC[i].envelopeLevel * WaveTable[SoundsC[i].wavetablePos]);
-		//mixOutC += WaveTable[SoundsC[i].wavetablePos];
-	}
+	// mixOutC = 0;
+	// for (uint8_t i = 0; i < POLY_NUM; i++)
+	// {
+	// 	uint8_t carrier=0;
+	// 	if ((SoundsC[i].wavetablePos_frac+SoundsC[i].increment+carrier)>255)
+	// 		carrier=1;
+	// 	SoundsC[i].wavetablePos_int+=carrier;
+		
+
+
+	// 	if ((SoundsC[i].wavetablePos_byte1+ SoundsC[i].wavetablePos_byte2<<8)>= WAVETABLE_LEN)
+	// 	{
+	// 		SoundsC[i].wavetablePos_byte0 -= WAVETABLE_LOOP_LEN;
+	// 	}
+	// 	mixOutC += (SoundsC[i].envelopeLevel * WaveTable[SoundsC[i].wavetablePos_byte0]);
+	// 	//mixOutC += WaveTable[SoundsC[i].wavetablePos_byte0];
+	// }
 }
 
 void GenDecayEnvlope()
 {
-	static uint8_t TimeCnt = 0;
-	if (TimeCnt != 30)
-		TimeCnt++;
-	else
-	{
-		TimeCnt = 0;
-		for (uint8_t i = 0; i < POLY_NUM; i++)
-		{
-			if (Sounds[i].wavetablePos >= WAVETABLE_ATTACK_LEN &&
-				Sounds[i].envelopePos < sizeof(EnvelopeTable)-1)
-			{
-				Sounds[i].envelopeLevel = EnvelopeTable[Sounds[i].envelopePos];
-				Sounds[i].envelopePos += 1;
-			}
-		}
-	}
+	// static uint8_t TimeCnt = 0;
+	// if (TimeCnt != 30)
+	// 	TimeCnt++;
+	// else
+	// {
+	// 	TimeCnt = 0;
+	// 	for (uint8_t i = 0; i < POLY_NUM; i++)
+	// 	{
+	// 		if (Sounds[i].wavetablePos_byte0 >= WAVETABLE_ATTACK_LEN &&
+	// 			Sounds[i].envelopePos < sizeof(EnvelopeTable)-1)
+	// 		{
+	// 			Sounds[i].envelopeLevel = EnvelopeTable[Sounds[i].envelopePos];
+	// 			Sounds[i].envelopePos += 1;
+	// 		}
+	// 	}
+	// }
 }
 
 extern void Synth(void);
@@ -249,8 +256,8 @@ int32_t ccd;
 	{
 		//Synth();
 		//SynthC();
-		printf("T:%d MIXOUT_ASM:%d MIXOUT_C:%d\n", i, mixOutAsm, mixOutC);
-		printf("T:%d POS_ASM:%d POS_C:%d\n", i, Sounds[0].wavetablePos, SoundsC[0].wavetablePos);
+		//printf("T:%d MIXOUT_ASM:%d MIXOUT_C:%d\n", i, mixOutAsm, mixOutC);
+		//printf("T:%d POS_ASM:%d POS_C:%d\n", i, Sounds[0].wavetablePos_byte0, SoundsC[0].wavetablePos_byte0);
 	}
 
 	// for (uint16_t i = 0; i < 62000; i++)
