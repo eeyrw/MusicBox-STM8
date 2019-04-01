@@ -31,8 +31,8 @@ WAVETABLE_LEN=1758
 WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
 
-REG_TIM2_CCR2L=0x314;
-REG_TIM2_CCR3L=0x316;
+REG_TIM2_CCR2L=0x314+0x5000;
+REG_TIM2_CCR3L=0x316+0x5000;
 
 
 .area DATA
@@ -118,7 +118,7 @@ loopSynth$:
 loopSynth_end$:
 
 	ldw x,_mixOutAsm
-	sraw x
+	;sraw x
 	cpw x,#253
 	jrslt branch_lt_253$
 	ldw x,#253

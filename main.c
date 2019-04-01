@@ -13,6 +13,7 @@
 
 extern void TestProcess(void);
 
+Synthesizer synthesizerMain;
 
 uint16_t globalTimer = 0;
 
@@ -33,21 +34,20 @@ void Play()
 
 void timer_isr() __interrupt(TIM4_ISR)
 {
-
+	static uint8_t genDecayEnvTick=0;
 
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
-	//Synth();
-	//mix32=0;
-	// for (uint8_t i = 0; i < POLY_NUM; i++)
-	// {
-	// 	mix32+=Sounds[i].val;
-	// }
+	Synth();
+	if(genDecayEnvTick<60)
+		genDecayEnvTick++;
+	else
+	{
+		GenDecayEnvlope(&synthesizerMain);
+		genDecayEnvTick=0;
+	}
 
-
-		//TIM2_CCR3L=(mix32+32767)>>8;
-	
-MEASURE_E;
+	MEASURE_E;
 }
 
 /*
@@ -72,6 +72,8 @@ void main()
 {
 	CLK_CKDIVR = 0x00;
 	uart_init();
+
+	SynthInit(&synthesizerMain,1);
 
 
 
@@ -106,66 +108,38 @@ void main()
 	TIM2_CCER2 |= 0x03;     //通道3使能，低电平有效，配置为输出
 
     //初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
-    TIM2_PSCR = 0X00;   
+    TIM2_PSCR = 0X01;   
     //初始化自动装载寄存器，决定PWM 方波的频率，Fpwm=0.125M/62500=2HZ
     TIM2_ARRH = 0;
     TIM2_ARRL = 0xFF;
     //初始化比较寄存器，决定PWM 方波的占空比：5000/10000 = 50%
     TIM2_CCR3H = 0;
-    TIM2_CCR3L = 10;
+    TIM2_CCR3L = 122;
     TIM2_CCR2H = 0;
-    TIM2_CCR2L = 10;
+    TIM2_CCR2L = 123;
 
     // 启动计数;更新中断失能
 
     TIM2_IER = 0x00; 
-	    TIM2_CR1 |= 0x81;
+	TIM2_CR1 |= 0x81;
 /*设置为推挽输出,PD2接了LED灯*/
 
     PA_DDR |= 0X08;             //设置PA3端口为输出模式
     PA_CR1 |= 0X08;             //设置PA3端口为推挽输出模式
     //PA_CR2 |= 0XF7;
 
+	PD_DDR |=(1<<2|1<<3);
+	PD_CR1 |=(1<<2|1<<3);
 
-	//InitSound();
 
-	//NoteOn(4);
-	//NoteOn(34);
-	//NoteOnC(4);
-
-	//NoteOnC(20);
-	//for (uint8_t i = 0; i < 10; i++)
-	//{
-		//Synth();
-		//SynthC();
-		//printf("T:%d MIXOUT_ASM:%d MIXOUT_C:%d\n", i, mixOutAsm, mixOutC);
-		//printf("T:%d POS_ASM:%d POS_C:%d\n", i, Sounds[0].wavetablePos_byte0, SoundsC[0].wavetablePos_byte0);
-	//}
-
-	// for (uint16_t i = 0; i < 62000; i++)
-	// {
-	// 	Synth();
-	// 	GenDecayEnvlope();
-	// 	if(!(i%100))
-	// 		printf("%d\n", mixOutAsm);
-	// }
-
-	TestProcess();
+	//TestProcess();
 
 	while (1)
 	{
-		//NoteOn(10);
-
-		//TIM2_CCR3L=0XF;
-		//delay_ms(100);
-		//TIM2_CCR3L=0XF6;
-		
-		// do nothing
-
-			for (uint8_t i = 0; i < 56; i++)
-	{
-		//NoteOn(i);
-		//delay_ms(200);
-	}
+		for (uint8_t i = 0; i < 56; i++)
+		{
+			NoteOn(&synthesizerMain,i);
+			delay_ms(50);
+		}
 	}
 }
