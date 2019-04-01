@@ -10,17 +10,19 @@
 ;	uint8_t envelopeLevel;
 ;	uint8_t envelopePos;
 ;	int16_t val;
+;	int8_t sampleVal;
 ;} SoundUnit;
 
-SoundUnitSize=9
-pIncrement_frac=0
-pIncrement_int=1
+SoundUnitSize=10
+pIncrement_int=0
+pIncrement_frac=1
 pWavetablePos_frac=2;
-pWavetablePos_int_l=3;
-pWavetablePos_int_h=4;
+pWavetablePos_int_h=3;
+pWavetablePos_int_l=4;
 pEnvelopeLevel=5
 pEnvelopePos=6
 pVal=7
+pSampleVal=9
 
 ENVELOP_LEN=128
 POLY_NUM=5
@@ -41,7 +43,9 @@ REG_TIM2_CCR3L=0x316;
 _Synth:
 
 	clr a				; Register A as loop index.
-	ldw y,#_Sounds 		; Load sound unit pointer to register Y.
+	ldw y,_asmSoundListAddress 		; Load sound unit pointer to register Y.
+	clrw x
+	ldw _mixOutAsm,x
 
 loopSynth$:
     cp a,#POLY_NUM
@@ -49,8 +53,11 @@ loopSynth$:
 	push a				; Keep a as temporary variable
 ; loop body
 		ldw x,y
-		ldw x,(pWavetablePos_int_l,x)	; Get a sample by pWavetablePos_int and save to a
+		ldw x,(pWavetablePos_int_h,x)	; Get a sample by pWavetablePos_int and save to a
 		ld a,(_WaveTable,x)
+
+		
+		ld (pSampleVal,y),a
 
 		push a
 		ld a,(pEnvelopeLevel,y); Load evnvlopelevel to xl
@@ -60,14 +67,25 @@ loopSynth$:
 		tnz a				; Test if a<0
 		jrmi branch1_end$	; Do signed mutiple with unsigned MUL
 		mul x,a
+		ld a,xh				; Div with 0xFF
+		ld xl,a
+		ld a,#0
+		ld xh,a
 		jra branch2_end$	
 	branch1_end$:
 		neg a				;Do signed mutiple with unsigned MUL
 		mul x,a				; Mutiple envelopeLevel with sample
+		ld a,xh				; Div with 0xFF
+		ld xl,a
+		ld a,#0
+		ld xh,a
 		negw x
 	branch2_end$:
 
-		addw x,_mixOutAsm;
+		ldw (pVal,y),x
+
+		addw x,_mixOutAsm
+		ldw _mixOutAsm,x
 
 		; Do calculation :[pWavetablePos]+=[pIncrement]
 		ld a,(pIncrement_frac,y) ; Get frac part of increment.
@@ -89,7 +107,7 @@ loopSynth$:
 		jrc branch0_end$			; Jump if WAVETABLE_LEN is great than x
 		subw x,#WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
 	branch0_end$:
-		ldw (pWavetablePos_int_l,y),x ;
+		ldw (pWavetablePos_int_h,y),x ;
 						
 
 	pop a

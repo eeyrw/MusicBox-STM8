@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define TEST_LOOP_NUN 100
+#define TEST_LOOP_NUN 200
 
 Synthesizer synthesizerC;
 Synthesizer synthesizerASM;
@@ -19,10 +19,14 @@ void TestProcess(void)
 {
     SoundUnitUnion* soundUnionList;
     TestInit();
-    for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
+    for(uint8_t i=0;i<POLY_NUM;i++)
     {
         NoteOn(&synthesizerC,i%56);
         NoteOn(&synthesizerASM,i%56);
+    }
+    for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
+    {
+
         Synth();
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
@@ -35,6 +39,16 @@ void TestProcess(void)
         {
             printf("%6d ",soundUnionList[k].combine.val);
         }
+        printf("\n                                 ");
+        for(uint8_t k=0;k<POLY_NUM;k++)
+        {
+            printf("%6d ",soundUnionList[k].combine.sampleVal);
+        }
+        printf("\n                               WP");
+        for(uint8_t k=0;k<POLY_NUM;k++)
+        {
+            printf("%6u",soundUnionList[k].combine.wavetablePos_int);
+        }
         printf("\n");
 
         printf("Synth A: MixOut: %6d EachChn: ",mixOutAsm);
@@ -42,6 +56,16 @@ void TestProcess(void)
         for(uint8_t k=0;k<POLY_NUM;k++)
         {
             printf("%6d ",soundUnionList[k].combine.val);
+        }
+        printf("\n                                 ");
+        for(uint8_t k=0;k<POLY_NUM;k++)
+        {
+            printf("%6d ",soundUnionList[k].combine.sampleVal);
+        }
+        printf("\n                               WP");
+        for(uint8_t k=0;k<POLY_NUM;k++)
+        {
+            printf("%6u",soundUnionList[k].combine.wavetablePos_int);
         }
         printf("\n");
     }

@@ -1,5 +1,6 @@
 #include "SynthCore.h"
 #include <stdint.h>
+#include <stdio.h>
 #include "constantTable.h"
 
 int16_t mixOutAsm;
@@ -12,16 +13,16 @@ void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth)
 	for (uint8_t i = 0; i < POLY_NUM; i++)
 	{
 		soundUnionList[i].combine.increment = 0;
-		soundUnionList[i].combine.envelopePos = 0;
-		soundUnionList[i].combine.envelopeLevel = 255;
 		soundUnionList[i].combine.wavetablePos_frac = 0;
 		soundUnionList[i].combine.wavetablePos_int = 0;
+		soundUnionList[i].combine.envelopeLevel = 255;
+		soundUnionList[i].combine.envelopePos = 0;
         soundUnionList[i].combine.val = 0;
 	}
     synth->lastSoundUnit=0;
 
     if(isUseAsmSynth!=0)
-        asmSoundListAddress=(uint16_t)&(soundUnionList[0].combine.increment);
+        asmSoundListAddress=(uint16_t)soundUnionList;
 }
 
 void NoteOn(Synthesizer* synth,uint8_t note)
@@ -29,6 +30,8 @@ void NoteOn(Synthesizer* synth,uint8_t note)
 	uint8_t lastSoundUnit = synth->lastSoundUnit;
 
 	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note];
+	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
 
@@ -47,9 +50,11 @@ void SynthC(Synthesizer* synth)
     for(uint8_t i=0;i<POLY_NUM;i++)
     {
         soundUnionList[i].combine.val=soundUnionList[i].combine.envelopeLevel*WaveTable[soundUnionList[i].combine.wavetablePos_int]/255;
-        uint32_t waveTablePos=soundUnionList[i].combine.increment+
+        soundUnionList[i].combine.sampleVal=WaveTable[soundUnionList[i].combine.wavetablePos_int];
+		uint32_t waveTablePos=soundUnionList[i].combine.increment+
                              soundUnionList[i].combine.wavetablePos_frac+
-                             (soundUnionList[i].combine.wavetablePos_int<<8); 
+                             ((uint32_t)soundUnionList[i].combine.wavetablePos_int<<8); 
+
         uint16_t waveTablePosInt= waveTablePos>>8;
         if(waveTablePosInt>WAVETABLE_LEN)
            waveTablePosInt-=WAVETABLE_LOOP_LEN;

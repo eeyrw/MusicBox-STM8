@@ -13,6 +13,7 @@ typedef struct _SoundUnit
 	uint8_t envelopeLevel;
 	uint8_t envelopePos;
 	int16_t val;
+	int8_t sampleVal;
 } SoundUnit;
 
 typedef struct _SoundUnitSplit
@@ -24,6 +25,7 @@ typedef struct _SoundUnitSplit
 	uint8_t envelopeLevel;
 	uint8_t envelopePos;
 	int16_t val;
+	int8_t sampleVal;
 } SoundUnitSplit;
 
 
