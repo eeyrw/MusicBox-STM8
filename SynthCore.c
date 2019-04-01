@@ -67,8 +67,8 @@ void GenDecayEnvlope(Synthesizer* synth)
 		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
 				soundUnionList[i].combine.envelopePos < sizeof(EnvelopeTable)-1)
 		{
-				soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
-				soundUnionList[i].combine.envelopePos += 1;
+			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
+			soundUnionList[i].combine.envelopePos += 1;
 		}
 	}
 }
