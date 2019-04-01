@@ -37,7 +37,7 @@ void timer_isr() __interrupt(TIM4_ISR)
 
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
-	Synth();
+	//Synth();
 	//mix32=0;
 	// for (uint8_t i = 0; i < POLY_NUM; i++)
 	// {
