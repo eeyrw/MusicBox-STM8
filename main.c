@@ -4,37 +4,17 @@
 #include <stm8s.h>
 #include <uart.h>
 #include <delay.h>
+#include "SynthCore.h"
 
 #define OUTPUT_PIN 5
 
 #define MEASURE_S PB_ODR |= (1 << OUTPUT_PIN)
 #define MEASURE_E PB_ODR &= ~(1 << OUTPUT_PIN)
 
-extern uint16_t PitchIncrementTable[];
-extern uint8_t EnvelopeTable[256];
-extern int8_t WaveTable[];
-typedef struct _SoundUnit
-{
-	uint16_t increment;
-	uint8_t  wavetablePos_frac;
-	uint16_t  wavetablePos_int;
-	uint8_t envelopeLevel;
-	uint8_t envelopePos;
-	int16_t val;
-} SoundUnit;
+
+
 
 uint16_t globalTimer = 0;
-int16_t mixOutAsm;
-int32_t mixOutC;
-
-#define POLY_NUM 5
-
-SoundUnit Sounds[POLY_NUM];
-SoundUnit SoundsC[POLY_NUM];
-
-#define WAVETABLE_ATTACK_LEN 1630
-#define WAVETABLE_LEN 1758
-#define WAVETABLE_LOOP_LEN (WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
 uint8_t playstatus = 0;
 
@@ -49,98 +29,8 @@ void Play()
 	}
 }
 
-void NoteOn(uint8_t note)
-{
-	static uint8_t lastSoundUnit = 0;
-
-disable_interrupts();
-	Sounds[lastSoundUnit].increment = PitchIncrementTable[note];
-	Sounds[lastSoundUnit].envelopePos = 0;
-	Sounds[lastSoundUnit].envelopeLevel = EnvelopeTable[0];
-enable_interrupts();
-	if (lastSoundUnit + 1 == POLY_NUM)
-		lastSoundUnit = 0;
-	else
-		lastSoundUnit++;
-}
-
-void NoteOnC(uint8_t note)
-{
-	static uint8_t lastSoundUnit = 0;
-
-	SoundsC[lastSoundUnit].increment = PitchIncrementTable[note];
-	SoundsC[lastSoundUnit].envelopePos = 0;
-	SoundsC[lastSoundUnit].envelopeLevel = 255;
-
-	if (lastSoundUnit + 1 == POLY_NUM)
-		lastSoundUnit = 0;
-	else
-		lastSoundUnit++;
-}
-
-void InitSound()
-{
-	for (uint8_t i = 0; i < 5; i++)
-	{
-		SoundsC[i].increment = 0;
-		SoundsC[i].envelopePos = 0;
-		SoundsC[i].envelopeLevel = 255;
-		SoundsC[i].wavetablePos_frac = 0;
-		SoundsC[i].wavetablePos_int = 0;
-
-		Sounds[i].increment = 0;
-		Sounds[i].envelopePos = 0;
-		Sounds[i].envelopeLevel = 255;
-		Sounds[i].wavetablePos_frac = 0;
-		Sounds[i].wavetablePos_int = 0;
-	}
-}
-
-int16_t SynthC()
-{
-	// mixOutC = 0;
-	// for (uint8_t i = 0; i < POLY_NUM; i++)
-	// {
-	// 	uint8_t carrier=0;
-	// 	if ((SoundsC[i].wavetablePos_frac+SoundsC[i].increment+carrier)>255)
-	// 		carrier=1;
-	// 	SoundsC[i].wavetablePos_int+=carrier;
-		
 
 
-	// 	if ((SoundsC[i].wavetablePos_byte1+ SoundsC[i].wavetablePos_byte2<<8)>= WAVETABLE_LEN)
-	// 	{
-	// 		SoundsC[i].wavetablePos_byte0 -= WAVETABLE_LOOP_LEN;
-	// 	}
-	// 	mixOutC += (SoundsC[i].envelopeLevel * WaveTable[SoundsC[i].wavetablePos_byte0]);
-	// 	//mixOutC += WaveTable[SoundsC[i].wavetablePos_byte0];
-	// }
-}
-
-void GenDecayEnvlope()
-{
-	static uint8_t TimeCnt = 0;
-	if (TimeCnt != 30)
-		TimeCnt++;
-	else
-	{
-		TimeCnt = 0;
-		for (uint8_t i = 0; i < POLY_NUM; i++)
-		{
-			if (Sounds[i].wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
-				Sounds[i].envelopePos < sizeof(EnvelopeTable)-1)
-			{
-				Sounds[i].envelopeLevel = EnvelopeTable[Sounds[i].envelopePos];
-				Sounds[i].envelopePos += 1;
-			}
-		}
-	}
-}
-
-extern void Synth(void);
-
-uint16_t wtCnt=0;
-int16_t mix32=0;
 void timer_isr() __interrupt(TIM4_ISR)
 {
 
@@ -237,10 +127,10 @@ void main()
     //PA_CR2 |= 0XF7;
 
 
-	InitSound();
+	//InitSound();
 
 	//NoteOn(4);
-	NoteOn(34);
+	//NoteOn(34);
 	//NoteOnC(4);
 
 	//NoteOnC(20);
@@ -274,8 +164,8 @@ void main()
 
 			for (uint8_t i = 0; i < 56; i++)
 	{
-		NoteOn(i);
-		delay_ms(200);
+		//NoteOn(i);
+		//delay_ms(200);
 	}
 	}
 }
