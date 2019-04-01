@@ -17,7 +17,6 @@ typedef struct _SoundUnit
 
 typedef struct _SoundUnitSplit
 {
-	uint16_t increment;
 	uint8_t increment_frac;
 	uint8_t increment_int;
 	uint8_t  wavetablePos_frac;
