@@ -45,10 +45,11 @@ extern int16_t mixOutAsm;
 extern int16_t mixOutC;
 extern uint16_t asmSoundListAddress;
 
-void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth);
-void NoteOn(Synthesizer* synth,uint8_t note);
-void SynthC(Synthesizer* synth);
-void GenDecayEnvlope(Synthesizer* synth);
+extern void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth);
+extern void NoteOn(Synthesizer* synth,uint8_t note);
+extern void SynthC(Synthesizer* synth);
+extern void GenDecayEnvlope(Synthesizer* synth);
+extern void Synth(void);
 
 
 #endif

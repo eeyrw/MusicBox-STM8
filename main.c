@@ -11,7 +11,7 @@
 #define MEASURE_S PB_ODR |= (1 << OUTPUT_PIN)
 #define MEASURE_E PB_ODR &= ~(1 << OUTPUT_PIN)
 
-
+extern void TestProcess(void);
 
 
 uint16_t globalTimer = 0;
@@ -134,13 +134,13 @@ void main()
 	//NoteOnC(4);
 
 	//NoteOnC(20);
-	for (uint8_t i = 0; i < 10; i++)
-	{
+	//for (uint8_t i = 0; i < 10; i++)
+	//{
 		//Synth();
 		//SynthC();
 		//printf("T:%d MIXOUT_ASM:%d MIXOUT_C:%d\n", i, mixOutAsm, mixOutC);
 		//printf("T:%d POS_ASM:%d POS_C:%d\n", i, Sounds[0].wavetablePos_byte0, SoundsC[0].wavetablePos_byte0);
-	}
+	//}
 
 	// for (uint16_t i = 0; i < 62000; i++)
 	// {
@@ -150,7 +150,7 @@ void main()
 	// 		printf("%d\n", mixOutAsm);
 	// }
 
-	
+	TestProcess();
 
 	while (1)
 	{

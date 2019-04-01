@@ -21,8 +21,8 @@ void TestProcess(void)
     TestInit();
     for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
     {
-        NoteOn(&synthesizerC,i);
-        NoteOn(&synthesizerASM,i);
+        NoteOn(&synthesizerC,i%56);
+        NoteOn(&synthesizerASM,i%56);
         Synth();
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
