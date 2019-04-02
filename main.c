@@ -58,7 +58,7 @@ void HardwareInit(void)
 	TIM2_CCER2 |= 0x03;     //通道3使能，低电平有效，配置为输出
 
     //初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
-    TIM2_PSCR = 0X01;   
+    TIM2_PSCR = 0X00;   
     //初始化自动装载寄存器，决定PWM 方波的频率，Fpwm=0.125M/62500=2HZ
     TIM2_ARRH = 0;
     TIM2_ARRL = 0xFF;
@@ -88,16 +88,16 @@ void main()
 
 	PlayerInit(&mainPlayer);
 	HardwareInit();
-	TestProcess();
+	//TestProcess();
 	PlayerPlay(&mainPlayer);
 
 	while (1)
 	{
-		// for (uint8_t i = 0; i < 56; i++)
-		// {
-		// 	NoteOn(&synthesizerMain,i);
-		// 	delay_ms(50);
-		// }
+		for (uint8_t i = 0; i < 56; i++)
+		{
+			//NoteOn(&(mainPlayer.mainSynthesizer),i);
+			//delay_ms(20);
+		}
 		PlayerProcess(&mainPlayer);
 	}
 }

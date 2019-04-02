@@ -48,7 +48,8 @@ REG_TIM2_CCR3L=0x316+0x5000;
 
 
 .area DATA
-
+_mixOutAsm::
+	.ds 2
 
 .area CODE
 
@@ -57,7 +58,7 @@ _Synth:
 	clr a				; Register A as loop index.
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
 	clrw x
-	ldw (pMixOut,y),x
+	ldw _mixOutAsm,x
 
 loopSynth$:
     cp a,#POLY_NUM
@@ -96,13 +97,8 @@ loopSynth$:
 
 		ldw (pVal,y),x
 
-		ld a,xh
-		add a,(pMixOut+1,y)
-		ld (pMixOut+1,y),a
-
-		ld a,xl
-		adc a,(pMixOut,y)
-		ld (pMixOut,y),a
+		addw x,_mixOutAsm
+		ldw _mixOutAsm,x
 
 		; Do calculation :[pWavetablePos]+=[pIncrement]
 		ld a,(pIncrement_frac,y) ; Get frac part of increment.
@@ -133,9 +129,9 @@ loopSynth$:
     jra loopSynth$
 
 loopSynth_end$:
-	ldw x,y
-	ldw y,(pMixOut,y)
-	exgw x,y
+	ldw y,(0x03, sp) 
+	ldw x,_mixOutAsm
+	ldw (pMixOut,y),x
 	;sraw x
 	cpw x,#253
 	jrslt branch_lt_253$

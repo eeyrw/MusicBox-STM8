@@ -13,7 +13,7 @@ void Player32kProc(Player* player)
 {
     Synth(&(player->mainSynthesizer));
     player->currentTick++;
-    if(player->decayGenTick<50)
+    if(player->decayGenTick<200)
         player->decayGenTick+=1;
 }
 
@@ -23,13 +23,14 @@ void PlayerProcess(Player* player)
 
     uint8_t temp;
     uint32_t tempU32;
-    if(player->status==STATUS_PLAYING)
-    {
-        if(player->decayGenTick>=50)
+            if(player->decayGenTick>=200)
         {
             GenDecayEnvlope(&(player->mainSynthesizer));
             player->decayGenTick=0;
         }
+    if(player->status==STATUS_PLAYING)
+    {
+
 
 
         if((player->currentTick>>8)>=player->lastScoreTick)
@@ -38,8 +39,8 @@ void PlayerProcess(Player* player)
            {
                temp=*(player->scorePointer);
                player->scorePointer++;
-               NoteOn(&(player->mainSynthesizer),temp);
-           } while ((temp&0x80)!=0);
+               NoteOn(&(player->mainSynthesizer),temp&0x7F);
+           } while ((temp&0x80)==0);
            if(temp==0xFF)
            {
                player->status=STATUS_STOP;
