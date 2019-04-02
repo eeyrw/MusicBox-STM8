@@ -13,16 +13,28 @@
 ;	int8_t sampleVal;
 ;} SoundUnit;
 
+
+;typedef struct _Synthesizer
+;{
+;    SoundUnitUnion SoundUnitUnionList[POLY_NUM];
+;	int16_t mixOut;
+;    uint8_t lastSoundUnit;
+;}Synthesizer;
+
 SoundUnitSize=10
+
 pIncrement_int=0
 pIncrement_frac=1
-pWavetablePos_frac=2;
-pWavetablePos_int_h=3;
-pWavetablePos_int_l=4;
+pWavetablePos_frac=2
+pWavetablePos_int_h=3
+pWavetablePos_int_l=4
 pEnvelopeLevel=5
 pEnvelopePos=6
 pVal=7
 pSampleVal=9
+
+pMixOut=SoundUnitSize*POLY_NUM
+
 
 ENVELOP_LEN=128
 POLY_NUM=5
@@ -43,9 +55,9 @@ REG_TIM2_CCR3L=0x316+0x5000;
 _Synth:
 
 	clr a				; Register A as loop index.
-	ldw y,_asmSoundListAddress 		; Load sound unit pointer to register Y.
+	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
 	clrw x
-	ldw _mixOutAsm,x
+	ldw (pMixOut,y),x
 
 loopSynth$:
     cp a,#POLY_NUM
@@ -84,8 +96,13 @@ loopSynth$:
 
 		ldw (pVal,y),x
 
-		addw x,_mixOutAsm
-		ldw _mixOutAsm,x
+		ld a,xh
+		add a,(pMixOut+1,y)
+		ld (pMixOut+1,y),a
+
+		ld a,xl
+		adc a,(pMixOut,y)
+		ld (pMixOut,y),a
 
 		; Do calculation :[pWavetablePos]+=[pIncrement]
 		ld a,(pIncrement_frac,y) ; Get frac part of increment.
@@ -116,8 +133,9 @@ loopSynth$:
     jra loopSynth$
 
 loopSynth_end$:
-
-	ldw x,_mixOutAsm
+	ldw x,y
+	ldw y,(pMixOut,y)
+	exgw x,y
 	;sraw x
 	cpw x,#253
 	jrslt branch_lt_253$

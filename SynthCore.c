@@ -3,11 +3,8 @@
 #include <stdio.h>
 #include "constantTable.h"
 
-int16_t mixOutAsm;
-int16_t mixOutC;
-uint16_t asmSoundListAddress;
 
-void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth)
+void SynthInit(Synthesizer* synth)
 {
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
 	for (uint8_t i = 0; i < POLY_NUM; i++)
@@ -20,9 +17,6 @@ void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth)
         soundUnionList[i].combine.val = 0;
 	}
     synth->lastSoundUnit=0;
-
-    if(isUseAsmSynth!=0)
-        asmSoundListAddress=(uint16_t)soundUnionList;
 }
 
 void NoteOn(Synthesizer* synth,uint8_t note)
@@ -45,7 +39,7 @@ void NoteOn(Synthesizer* synth,uint8_t note)
 
 void SynthC(Synthesizer* synth)
 {
-    mixOutC=0;
+    synth->mixOut=0;
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
     for(uint8_t i=0;i<POLY_NUM;i++)
     {
@@ -60,7 +54,7 @@ void SynthC(Synthesizer* synth)
            waveTablePosInt-=WAVETABLE_LOOP_LEN;
         soundUnionList[i].combine.wavetablePos_int= waveTablePosInt;
         soundUnionList[i].combine.wavetablePos_frac=0xFF&waveTablePos;
-        mixOutC+=soundUnionList[i].combine.val;
+        synth->mixOut+=soundUnionList[i].combine.val;
     }
 }
 

@@ -39,6 +39,7 @@ typedef union _SoundUnitUnion
 typedef struct _Synthesizer
 {
     SoundUnitUnion SoundUnitUnionList[POLY_NUM];
+	int16_t mixOut;
     uint8_t lastSoundUnit;
 }Synthesizer;
 
@@ -46,11 +47,11 @@ extern int16_t mixOutAsm;
 extern int16_t mixOutC;
 extern uint16_t asmSoundListAddress;
 
-extern void SynthInit(Synthesizer* synth,uint8_t isUseAsmSynth);
+extern void SynthInit(Synthesizer* synth);
 extern void NoteOn(Synthesizer* synth,uint8_t note);
 extern void SynthC(Synthesizer* synth);
 extern void GenDecayEnvlope(Synthesizer* synth);
-extern void Synth(void);
+extern void Synth(Synthesizer* synth);
 
 
 #endif

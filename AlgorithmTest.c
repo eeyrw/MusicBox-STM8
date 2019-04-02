@@ -10,8 +10,8 @@ Synthesizer synthesizerASM;
 
 void TestInit(void)
 {
-    SynthInit(&synthesizerC,0);
-    SynthInit(&synthesizerASM,1);
+    SynthInit(&synthesizerC);
+    SynthInit(&synthesizerASM);
 }
 
 
@@ -27,13 +27,13 @@ void TestProcess(void)
     for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
     {
 
-        Synth();
+        Synth(&synthesizerASM);
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
         GenDecayEnvlope(&synthesizerASM);
 
         printf("=============%d==============\n",i);
-        printf("Synth C: MixOut: %6d EachChn: ",mixOutC);
+        printf("Synth C: MixOut: %6d EachChn: ",synthesizerC.mixOut);
         soundUnionList=&(synthesizerC.SoundUnitUnionList[0]);
         for(uint8_t k=0;k<POLY_NUM;k++)
         {
@@ -51,7 +51,7 @@ void TestProcess(void)
         }
         printf("\n");
 
-        printf("Synth A: MixOut: %6d EachChn: ",mixOutAsm);
+        printf("Synth A: MixOut: %6d EachChn: ",synthesizerASM.mixOut);
         soundUnionList=&(synthesizerASM.SoundUnitUnionList[0]);
         for(uint8_t k=0;k<POLY_NUM;k++)
         {

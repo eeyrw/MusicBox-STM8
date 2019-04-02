@@ -38,7 +38,7 @@ void timer_isr() __interrupt(TIM4_ISR)
 
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
-	Synth();
+	Synth(&synthesizerMain);
 	if(genDecayEnvTick<60)
 		genDecayEnvTick++;
 	else
@@ -73,7 +73,9 @@ void main()
 	CLK_CKDIVR = 0x00;
 	uart_init();
 
-	SynthInit(&synthesizerMain,1);
+
+
+	SynthInit(&synthesizerMain);
 
 
 
@@ -132,7 +134,7 @@ void main()
 	PD_CR1 |=(1<<2|1<<3);
 
 
-	//TestProcess();
+	TestProcess();
 
 	while (1)
 	{

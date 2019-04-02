@@ -33,9 +33,6 @@ const uint8_t EnvelopeTable[] = {
 	8, 8, 7, 7, 6, 6, 5, 4, 4, 3, 3, 2, 2, 1, 0, 0};
 
 
-
-const uint8_t Score[] = {1, 23};
-
 const int8_t WaveTable[]={
 //Attack area
         0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 3, 3, 2, 2, 4, 5
