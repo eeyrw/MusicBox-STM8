@@ -4,7 +4,7 @@
 #include <stm8s.h>
 #include <uart.h>
 #include <delay.h>
-#include "SynthCore.h"
+#include "Player.h"
 
 #define OUTPUT_PIN 5
 
@@ -13,72 +13,22 @@
 
 extern void TestProcess(void);
 
-Synthesizer synthesizerMain;
-
-uint16_t globalTimer = 0;
-
-uint8_t playstatus = 0;
-
-void Play()
-{
-	if (playstatus == 0)
-	{
-		playstatus = 1;
-	}
-	else
-	{
-	}
-}
-
-
+Player mainPlayer;
 
 void timer_isr() __interrupt(TIM4_ISR)
 {
-	static uint8_t genDecayEnvTick=0;
-
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
-	Synth(&synthesizerMain);
-	if(genDecayEnvTick<60)
-		genDecayEnvTick++;
-	else
-	{
-		GenDecayEnvlope(&synthesizerMain);
-		genDecayEnvTick=0;
-	}
-
+	Player32kProc(&mainPlayer);
 	MEASURE_E;
 }
 
-/*
- * Redirect stdout to UART
- */
-int putchar(int c)
-{
-	uart_write(c);
-	return 0;
-}
-
-
-/*
- * Redirect stdin to UART
- */
-int getchar()
-{
-	return uart_read();
-}
 
 void main()
 {
 	CLK_CKDIVR = 0x00;
 	uart_init();
-
-
-
-	SynthInit(&synthesizerMain);
-
-
-
+	PlayerInit(&mainPlayer);
 	enable_interrupts();
 
 	/* Set PD3 as output */
@@ -138,10 +88,10 @@ void main()
 
 	while (1)
 	{
-		for (uint8_t i = 0; i < 56; i++)
-		{
-			NoteOn(&synthesizerMain,i);
-			delay_ms(50);
-		}
+		// for (uint8_t i = 0; i < 56; i++)
+		// {
+		// 	NoteOn(&synthesizerMain,i);
+		// 	delay_ms(50);
+		// }
 	}
 }

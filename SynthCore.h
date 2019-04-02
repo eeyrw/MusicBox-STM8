@@ -43,9 +43,6 @@ typedef struct _Synthesizer
     uint8_t lastSoundUnit;
 }Synthesizer;
 
-extern int16_t mixOutAsm;
-extern int16_t mixOutC;
-extern uint16_t asmSoundListAddress;
 
 extern void SynthInit(Synthesizer* synth);
 extern void NoteOn(Synthesizer* synth,uint8_t note);
