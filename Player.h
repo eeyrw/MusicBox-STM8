@@ -14,7 +14,8 @@ enum PLAY_STATUS{
 typedef struct _Player
 {
 	uint8_t status;
-	uint32_t  scoreTick;
+    uint32_t  currentTick;
+	uint32_t  lastScoreTick;
 	uint8_t  decayGenTick;
     uint8_t* scorePointer;
     Synthesizer mainSynthesizer;
@@ -24,6 +25,6 @@ typedef struct _Player
 extern void PlayerInit(Player* player);
 extern void Player32kProc(Player* player);
 extern void PlayerProcess(Player* player);
-
+extern void PlayerPlay(Player* player);
 
 #endif

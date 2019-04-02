@@ -7,24 +7,22 @@
 #include "SynthCore.h"
 #include "Player.h"
 
+extern unsigned char Score[];
+
 void Player32kProc(Player* player)
 {
     Synth(&(player->mainSynthesizer));
-    player->scoreTick+=1;
+    player->currentTick++;
     if(player->decayGenTick<50)
         player->decayGenTick+=1;
 }
 
-uint16_t DecodeScore(uint8_t* scorePointer,uint8_t* note,uint32_t* duration)
-{
-
-}
 
 void PlayerProcess(Player* player)
 {
-    uint8_t note;
-    uint32_t duration;
-    uint16_t scoreReadLen;
+
+    uint8_t temp;
+    uint32_t tempU32;
     if(player->status==STATUS_PLAYING)
     {
         if(player->decayGenTick>=50)
@@ -32,30 +30,48 @@ void PlayerProcess(Player* player)
             GenDecayEnvlope(&(player->mainSynthesizer));
             player->decayGenTick=0;
         }
-        do
+
+
+        if((player->currentTick>>8)>=player->lastScoreTick)
         {
-           scoreReadLen=DecodeScore(player->scorePointer,&note,&duration);
-
-        } while (0);
-        
-
-        
+           do
+           {
+               temp=*(player->scorePointer);
+               player->scorePointer++;
+               NoteOn(&(player->mainSynthesizer),temp);
+           } while ((temp&0x80)!=0);
+           if(temp==0xFF)
+           {
+               player->status=STATUS_STOP;
+           }
+           tempU32=player->lastScoreTick;
+            do
+           {
+               temp=*(player->scorePointer);
+               player->scorePointer++;
+               tempU32+=temp;
+           } while (temp==0xFF);
+           player->lastScoreTick=tempU32;
+        }
 
     }
-    else if(player->status==STATUS_REDAY_TO_PLAY)
-    {
+}
 
-    }
-    else if(player->status==STATUS_STOP)
-    {
-        
-    }
+void PlayerPlay(Player* player)
+{
+    player->currentTick=0;
+    player->lastScoreTick=0;
+    player->decayGenTick=0;
+    player->scorePointer=Score;
+    player->status=STATUS_PLAYING;
 }
 
 void PlayerInit(Player* player)
 {
     player->status=STATUS_STOP;
-    player->scoreTick=0;
+    player->currentTick=0;
+    player->lastScoreTick=0;
     player->decayGenTick=0;
+    player->scorePointer=Score;
     SynthInit(&(player->mainSynthesizer));
 }

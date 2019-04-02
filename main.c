@@ -23,12 +23,10 @@ void timer_isr() __interrupt(TIM4_ISR)
 	MEASURE_E;
 }
 
-
-void main()
+void HardwareInit(void)
 {
 	CLK_CKDIVR = 0x00;
 	uart_init();
-	PlayerInit(&mainPlayer);
 	enable_interrupts();
 
 	/* Set PD3 as output */
@@ -82,9 +80,16 @@ void main()
 
 	PD_DDR |=(1<<2|1<<3);
 	PD_CR1 |=(1<<2|1<<3);
+	
+}
 
+void main()
+{
 
+	PlayerInit(&mainPlayer);
+	HardwareInit();
 	TestProcess();
+	PlayerPlay(&mainPlayer);
 
 	while (1)
 	{
@@ -93,5 +98,6 @@ void main()
 		// 	NoteOn(&synthesizerMain,i);
 		// 	delay_ms(50);
 		// }
+		PlayerProcess(&mainPlayer);
 	}
 }
