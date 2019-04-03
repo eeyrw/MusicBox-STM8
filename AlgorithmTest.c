@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define TEST_LOOP_NUN 20
+#define TEST_LOOP_NUN 200
 
 Synthesizer synthesizerC;
 Synthesizer synthesizerASM;
@@ -78,7 +78,7 @@ void TestProcess(void)
         Synth(&synthesizerASM);
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
-        GenDecayEnvlope(&synthesizerASM);
+        GenDecayEnvlopeAsm(&synthesizerASM);
         printf("=============%d==============\n",i);
         printf("Synth C:\n");
         PrintParameters(&synthesizerC);
