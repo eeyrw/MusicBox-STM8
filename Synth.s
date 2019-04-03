@@ -82,16 +82,14 @@ loopSynth$:
 		tnz a				; Test if a<0
 		jrmi branch1_end$	; Do signed mutiple with unsigned MUL
 		mul x,a
-		ld a,xh				; Div with 0xFF
-		ld xl,a
+		swapw x				; Div with 0xFF. xl<->xh and let xh=0
 		ld a,#0
 		ld xh,a
 		jra branch2_end$	
 	branch1_end$:
 		neg a				;Do signed mutiple with unsigned MUL
 		mul x,a				; Mutiple envelopeLevel with sample
-		ld a,xh				; Div with 0xFF
-		ld xl,a
+		swapw x				; Div with 0xFF. xl<->xh and let xh=0
 		ld a,#0
 		ld xh,a
 		negw x
