@@ -22,7 +22,7 @@ void TestProcess(void)
     for(uint8_t i=0;i<POLY_NUM;i++)
     {
         NoteOn(&synthesizerC,i%56);
-        NoteOn(&synthesizerASM,i%56);
+        NoteOnAsm(&synthesizerASM,i%56);
     }
     for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
     {
@@ -30,7 +30,7 @@ void TestProcess(void)
         Synth(&synthesizerASM);
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
-        GenDecayEnvlope(&synthesizerASM);
+        GenDecayEnvlopeAsm(&synthesizerASM);
 
         printf("=============%d==============\n",i);
         printf("Synth C: MixOut: %6d EachChn: ",synthesizerC.mixOut);

@@ -1,6 +1,7 @@
 .module SYNTH
 .globl _Synth
-
+.globl _GenDecayEnvlopeAsm
+.globl _NoteOnAsm
 ;typedef struct _SoundUnit
 ;{
 ;	uint8_t increment_frac;
@@ -34,6 +35,7 @@ pVal=7
 pSampleVal=9
 
 pMixOut=SoundUnitSize*POLY_NUM
+pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 
 ENVELOP_LEN=128
@@ -150,5 +152,101 @@ branch_lt_gt_end$:
 	ld REG_TIM2_CCR3L,a	
 
 	ret
+
+
+_GenDecayEnvlopeAsm:
+	clr a				; Register A as loop index.
+	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
+loopGenDecayEnvlope$:
+    cp a,#POLY_NUM
+    jreq loopGenDecayEnvlope_end$
+	push a				; Keep a as temporary variable
+; loop body
+
+;    SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
+;	for (uint8_t i = 0; i < POLY_NUM; i++)
+;	{
+;		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
+;				soundUnionList[i].combine.envelopePos < sizeof(EnvelopeTable)-1)
+;		{
+;			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
+;			soundUnionList[i].combine.envelopePos += 1;
+;		}
+;	}
+
+	ldw x,y
+	ldw x,(pWavetablePos_int_h,x)
+	cpw x,#WAVETABLE_ATTACK_LEN
+	jrult envelopUpdateEnd$
+	ld a,(pEnvelopePos,y)
+	cp a,ENVELOP_LEN-1
+	jruge envelopUpdateEnd$
+	ldw x,y
+	ldw x,(pEnvelopePos,x)
+	ld a,(_EnvelopeTable,x)
+	ld (pEnvelopeLevel,y),a
+	inc (pEnvelopePos,y)
+
+envelopUpdateEnd$:	
+						
+
+	pop a
+    inc a
+	addw y,#SoundUnitSize
+    jra loopGenDecayEnvlope$
+
+	loopGenDecayEnvlope_end$:
+
+ret
+
+_NoteOnAsm:
+	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
+	
+; void NoteOn(Synthesizer* synth,uint8_t note)
+; {
+; 	uint8_t lastSoundUnit = synth->lastSoundUnit;
+
+; 	disable_interrupts();
+; 	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note];
+; 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
+; 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
+; 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
+; 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
+; 	enable_interrupts();
+
+; 	if (lastSoundUnit + 1 == POLY_NUM)
+; 		lastSoundUnit = 0;
+; 	else
+; 		lastSoundUnit++;
+
+;     synth->lastSoundUnit=lastSoundUnit;
+; }
+ ldw x,#SoundUnitSize
+ ld a,(pLastSoundUnit,y)
+ mul x,a
+ addw x,(0x03, sp)
+ ldw y,x
+ ldw x,(0x05, sp) ;uint8_t note
+ sim ;disable interrupt
+ ldw x,(_PitchIncrementTable,x)
+ ldw (pIncrement_int,y),x
+ clr (pWavetablePos_frac,y)
+  clr (pWavetablePos_int_h,y)
+   clr (pWavetablePos_int_l,y)
+   ld a,#255
+   ld (pEnvelopeLevel,y),a
+rim ;enable interrput
+
+ldw y,(0x03, sp)
+ ld a,(pLastSoundUnit,y)
+cp a,#(POLY_NUM-1)
+jrne lastSoundUnitUpdateEndNotEq$
+clr (pLastSoundUnit,y)
+jra lastSoundUnitUpdateEnd$
+lastSoundUnitUpdateEndNotEq$:
+inc (pLastSoundUnit,y)
+lastSoundUnitUpdateEnd$:
+
+ret
 
 

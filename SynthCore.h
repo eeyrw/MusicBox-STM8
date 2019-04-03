@@ -46,8 +46,10 @@ typedef struct _Synthesizer
 
 extern void SynthInit(Synthesizer* synth);
 extern void NoteOn(Synthesizer* synth,uint8_t note);
+extern void NoteOnAsm(Synthesizer* synth,uint8_t note);
 extern void SynthC(Synthesizer* synth);
 extern void GenDecayEnvlope(Synthesizer* synth);
+extern void GenDecayEnvlopeAsm(Synthesizer* synth);
 extern void Synth(Synthesizer* synth);
 
 
