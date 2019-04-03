@@ -44,7 +44,7 @@ _UpdateTick:
     ldw x,y
     ldw x,(pCurrentTick_b3,x)
     addw x,#1
-    ldw (pCurrentTick_b1,y),x    
+    ldw (pCurrentTick_b3,y),x    
 updateCurrentTickEnd$:
 
 ld a,(pDecayGenTick,y)
