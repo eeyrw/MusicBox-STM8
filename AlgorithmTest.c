@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define TEST_LOOP_NUN 200
+#define TEST_LOOP_NUN 20
 
 Synthesizer synthesizerC;
 Synthesizer synthesizerASM;
@@ -17,7 +17,7 @@ void TestInit(void)
 void PrintParameters(Synthesizer* synth)
 {
     SoundUnitUnion* soundUnionList;
-    printf("MixOut:",synth->mixOut);
+    printf("MixOut:%d\n",synth->mixOut);
     soundUnionList=&(synth->SoundUnitUnionList[0]);
 
     printf("%12s","Chn Val");
@@ -34,7 +34,7 @@ void PrintParameters(Synthesizer* synth)
     }
     printf("\n");
 
-    printf("%12s","Chn EnvlLevel");
+    printf("%12s","Chn EnvLevel");
     for(uint8_t k=0;k<POLY_NUM;k++)
     {
         printf("%6d ",soundUnionList[k].combine.envelopeLevel);
@@ -59,7 +59,7 @@ void PrintParameters(Synthesizer* synth)
     printf("%12s","Chn NoteIncr");
     for(uint8_t k=0;k<POLY_NUM;k++)
     {
-        printf("%6d ",soundUnionList[k].combine.increment);
+        printf("%6x ",soundUnionList[k].combine.increment);
     }
     printf("\n");
        
@@ -78,7 +78,7 @@ void TestProcess(void)
         Synth(&synthesizerASM);
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
-        GenDecayEnvlopeAsm(&synthesizerASM);
+        GenDecayEnvlope(&synthesizerASM);
         printf("=============%d==============\n",i);
         printf("Synth C:\n");
         PrintParameters(&synthesizerC);

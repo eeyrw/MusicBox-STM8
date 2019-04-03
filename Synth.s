@@ -59,7 +59,7 @@ _Synth:
 
 	clr a				; Register A as loop index.
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
-	clrw x
+	ldw x,#0
 	ldw _mixOutAsm,x
 
 loopSynth$:
@@ -82,14 +82,16 @@ loopSynth$:
 		tnz a				; Test if a<0
 		jrmi branch1_end$	; Do signed mutiple with unsigned MUL
 		mul x,a
-		swapw x				; Div with 0xFF. xl<->xh and let xh=0
+		ld a,xh				; Div with 0xFF
+		ld xl,a
 		ld a,#0
 		ld xh,a
 		jra branch2_end$	
 	branch1_end$:
 		neg a				;Do signed mutiple with unsigned MUL
 		mul x,a				; Mutiple envelopeLevel with sample
-		swapw x				; Div with 0xFF. xl<->xh and let xh=0
+		ld a,xh				; Div with 0xFF
+		ld xl,a
 		ld a,#0
 		ld xh,a
 		negw x
@@ -150,7 +152,6 @@ branch_lt_gt_end$:
 	ld REG_TIM2_CCR3L,a	
 
 	ret
-
 
 _GenDecayEnvlopeAsm:
 	clr a				; Register A as loop index.
@@ -224,7 +225,10 @@ _NoteOnAsm:
  mul x,a
  addw x,(0x03, sp)
  ldw y,x
- ldw x,(0x05, sp) ;uint8_t note
+ ld a,(0x05, sp) ;uint8_t note
+ ld xl,a
+ ld a,#2
+ mul x,a
  sim ;disable interrupt
  ldw x,(_PitchIncrementTable,x)
  ldw (pIncrement_int,y),x
