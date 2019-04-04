@@ -28,4 +28,6 @@ extern void PlayerProcess(Player* player);
 extern void PlayerPlay(Player* player);
 
 extern void UpdateTick(Player* player);
+extern uint8_t PlayNoteTimingCheck(Player* player);
+extern void PlayUpdateNextScoreTick(Player* player);
 #endif

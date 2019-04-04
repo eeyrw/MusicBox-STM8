@@ -25,7 +25,7 @@ void NoteOn(Synthesizer* synth,uint8_t note)
 	uint8_t lastSoundUnit = synth->lastSoundUnit;
 
 	disable_interrupts();
-	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note];
+	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note&0x7F];
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
