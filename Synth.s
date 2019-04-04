@@ -47,37 +47,38 @@ WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
 
 REG_TIM2_CCR2L=0x314+0x5000;
 REG_TIM2_CCR3L=0x316+0x5000;
-
-
 .area DATA
-_mixOutAsm::
-	.ds 2
 
 .area CODE
 
 _Synth:
 
-	clr a				; Register A as loop index.
-	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
-	ldw x,#0
-	ldw _mixOutAsm,x
+	clr a				
+	push a			; Keep a loop index in stack
+	clrw x
+	pushw x				; Keep mixOut result in stack
+	; The stack layout is:
+	; (0x01,sp)=mixOut
+	; (0x03,sp)=loop index
+	; (0x04,sp)=PCH
+	; (0x05,sp)=PCL
+	; (0x06,sp)=synthesizer object's address.
+	
+	ldw y,(0x06, sp) 	; Load sound unit pointer to register Y.
 
 loopSynth$:
+	ld a,(0x03,sp)
     cp a,#POLY_NUM
     jreq loopSynth_end$
-	push a				; Keep a as temporary variable
 ; loop body
 		ldw x,y
 		ldw x,(pWavetablePos_int_h,x)	; Get a sample by pWavetablePos_int and save to a
 		ld a,(_WaveTable,x)
-
-		
 		ld (pSampleVal,y),a
 
-		push a
 		ld a,(pEnvelopeLevel,y); Load evnvlopelevel to xl
 		ld xl,a
-		pop a
+		ld a,(pSampleVal,y)
 
 		tnz a				; Test if a<0
 		jrmi branch1_end$	; Do signed mutiple with unsigned MUL
@@ -99,8 +100,8 @@ loopSynth$:
 
 		ldw (pVal,y),x
 
-		addw x,_mixOutAsm
-		ldw _mixOutAsm,x
+		addw x,(0x01,sp)
+		ldw (0x01,sp),x
 
 		; Do calculation :[pWavetablePos]+=[pIncrement]
 		ld a,(pIncrement_frac,y) ; Get frac part of increment.
@@ -124,15 +125,13 @@ loopSynth$:
 	branch0_end$:
 		ldw (pWavetablePos_int_h,y),x ;
 						
-
-	pop a
-    inc a
+    inc (0x03,sp)
 	addw y,#SoundUnitSize
     jra loopSynth$
 
 loopSynth_end$:
-	ldw y,(0x03, sp) 
-	ldw x,_mixOutAsm
+	ldw y,(0x06, sp) 
+	ldw x,(0x01,sp)
 	ldw (pMixOut,y),x
 	;sraw x
 	cpw x,#253
@@ -150,6 +149,8 @@ branch_lt_gt_end$:
 	ld REG_TIM2_CCR2L,a
 	cpl a
 	ld REG_TIM2_CCR3L,a	
+
+	addw sp,#3
 
 	ret
 

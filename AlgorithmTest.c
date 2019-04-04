@@ -1,4 +1,5 @@
 #include "SynthCore.h"
+#include "Player.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -63,6 +64,25 @@ void PrintParameters(Synthesizer* synth)
     }
     printf("\n");
        
+}
+
+void TestUpdateTickFunc(void)
+{
+    uint32_t i;
+    Player player;
+    PlayerInit(&player);
+    for(i=0;i<0xffffffff;i++)
+    {
+        if(i!=player.currentTick)
+        {
+            printf("UpdateTickFunc get wrong in %ld loop.\n",i);
+            break;
+        }
+        UpdateTick(&player);
+    }
+    if(i==player.currentTick)
+        printf("UpdateTickFunc passed the test.\n");
+
 }
 
 void TestProcess(void)
