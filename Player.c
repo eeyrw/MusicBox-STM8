@@ -23,15 +23,14 @@ void PlayerProcess(Player *player)
 
     uint8_t temp;
     
-    if (player->decayGenTick >= 200)
+    if (player->decayGenTick >= 150)
     {
-        GenDecayEnvlope(&(player->mainSynthesizer));
+        GenDecayEnvlopeAsm(&(player->mainSynthesizer));
         player->decayGenTick = 0;
     }
     if (player->status == STATUS_PLAYING)
     {
-
-        if (PlayNoteTimingCheck(player))
+        if(PlayNoteTimingCheck(player))
         {
             do
             {
@@ -43,19 +42,9 @@ void PlayerProcess(Player *player)
                 }
                 else
                 {
-                    NoteOn(&(player->mainSynthesizer), temp);
+                    NoteOnAsm(&(player->mainSynthesizer), temp);
                 }
-
             } while ((temp & 0x80) == 0);
-
-            //    tempU32=player->lastScoreTick;
-            //     do
-            //    {
-            //        temp=*(player->scorePointer);
-            //        player->scorePointer++;
-            //        tempU32+=temp;
-            //    } while (temp==0xFF);
-            //    player->lastScoreTick=tempU32;
             PlayUpdateNextScoreTick(player);
         }
     }

@@ -19,7 +19,7 @@ void timer_isr() __interrupt(TIM4_ISR)
 {
 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	MEASURE_S;
-	//Player32kProc(&mainPlayer);
+	Player32kProc(&mainPlayer);
 	MEASURE_E;
 }
 
@@ -27,7 +27,7 @@ void HardwareInit(void)
 {
 	CLK_CKDIVR = 0x00;
 	uart_init();
-	//enable_interrupts();
+
 
 	/* Set PD3 as output */
 	PB_DDR |= (1 << OUTPUT_PIN);
@@ -80,16 +80,17 @@ void HardwareInit(void)
 
 	PD_DDR |=(1<<2|1<<3);
 	PD_CR1 |=(1<<2|1<<3);
+	enable_interrupts();
 	
 }
 
 void main()
 {
 
-	//PlayerInit(&mainPlayer);
+	PlayerInit(&mainPlayer);
 	HardwareInit();
-	TestProcess();
-	//PlayerPlay(&mainPlayer);
+	PlayerPlay(&mainPlayer);
+	//TestProcess();
 
 	while (1)
 	{
@@ -98,6 +99,6 @@ void main()
 			//NoteOn(&(mainPlayer.mainSynthesizer),i);
 			//delay_ms(20);
 		}
-		//PlayerProcess(&mainPlayer);
+		PlayerProcess(&mainPlayer);
 	}
 }

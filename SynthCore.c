@@ -32,10 +32,10 @@ void NoteOn(Synthesizer* synth,uint8_t note)
 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
 	enable_interrupts();
 
-	if (lastSoundUnit + 1 == POLY_NUM)
+	lastSoundUnit++;
+
+	if (lastSoundUnit== POLY_NUM)
 		lastSoundUnit = 0;
-	else
-		lastSoundUnit++;
 
     synth->lastSoundUnit=lastSoundUnit;
 }
@@ -67,7 +67,7 @@ void GenDecayEnvlope(Synthesizer* synth)
 	for (uint8_t i = 0; i < POLY_NUM; i++)
 	{
 		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
-				soundUnionList[i].combine.envelopePos < sizeof(EnvelopeTable)-1)
+				soundUnionList[i].combine.envelopePos <sizeof(EnvelopeTable)-1)
 		{
 			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
 			soundUnionList[i].combine.envelopePos += 1;

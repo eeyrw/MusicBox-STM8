@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-#define TEST_LOOP_NUN 200
+#define TEST_LOOP_NUN 10000
 
 Synthesizer synthesizerC;
 Synthesizer synthesizerASM;
@@ -78,7 +78,7 @@ void TestUpdateTickFunc(void)
     Player player;
     PlayerInit(&player);
     printf("~~~~~~~Start testing updateTickFunc.~~~~~~~\n");
-    for(i=0;i<0xffffffff;i++)
+    for(i=0;i<0xffff;i++)
     {
         if(i!=player.currentTick)
         {
@@ -92,7 +92,7 @@ void TestUpdateTickFunc(void)
 
 }
 
-void SynthParamterCompare(Synthesizer* synthA,Synthesizer* synthB)
+uint8_t SynthParamterCompare(Synthesizer* synthA,Synthesizer* synthB)
 {
     uint8_t error=0;
     SoundUnitUnion* sa=&(synthA->SoundUnitUnionList[0]);
@@ -129,8 +129,10 @@ void SynthParamterCompare(Synthesizer* synthA,Synthesizer* synthB)
     {
         printf("Passed.\n");
     }
+    return error;
     
 }
+extern Player mainPlayer;
 
 void TestSynth(void)
 {
@@ -140,14 +142,32 @@ void TestSynth(void)
         NoteOn(&synthesizerC,i%56);
         NoteOnAsm(&synthesizerASM,i%56);
     }
-    for(uint8_t i=0;i<TEST_LOOP_NUN;i++)
+    for(uint16_t i=0;i<TEST_LOOP_NUN;i++)
     {
+        //PlayerProcess(&mainPlayer);
+                NoteOn(&synthesizerC,i%56);
+        NoteOnAsm(&synthesizerASM,i%56);
+
         Synth(&synthesizerASM);
         SynthC(&synthesizerC);
         GenDecayEnvlope(&synthesizerC);
         GenDecayEnvlopeAsm(&synthesizerASM);
+                GenDecayEnvlope(&synthesizerC);
+        GenDecayEnvlopeAsm(&synthesizerASM);
+                GenDecayEnvlope(&synthesizerC);
+        GenDecayEnvlopeAsm(&synthesizerASM);
+                GenDecayEnvlope(&synthesizerC);
+                        NoteOn(&synthesizerC,i%56);
+        NoteOnAsm(&synthesizerASM,i%56);
+        GenDecayEnvlopeAsm(&synthesizerASM);
+                GenDecayEnvlope(&synthesizerC);
+        GenDecayEnvlopeAsm(&synthesizerASM);
+                GenDecayEnvlope(&synthesizerC);
+        GenDecayEnvlopeAsm(&synthesizerASM);
+
         printf("=============%d==============\n",i);
-        SynthParamterCompare(&synthesizerC,&synthesizerASM);
+        if(SynthParamterCompare(&synthesizerC,&synthesizerASM)>0)
+        break;
     }
 }
 

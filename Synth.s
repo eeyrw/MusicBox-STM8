@@ -38,8 +38,8 @@ pMixOut=SoundUnitSize*POLY_NUM
 pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 
-ENVELOP_LEN=128
-POLY_NUM=5
+ENVELOP_LEN=256
+POLY_NUM=6
 WAVETABLE_ATTACK_LEN=1630
 WAVETABLE_LEN=1758
 WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
@@ -177,12 +177,13 @@ loopGenDecayEnvlope$:
 	ldw x,y
 	ldw x,(pWavetablePos_int_h,x)
 	cpw x,#WAVETABLE_ATTACK_LEN
-	jrult envelopUpdateEnd$
+	jrc envelopUpdateEnd$
 	ld a,(pEnvelopePos,y)
-	cp a,ENVELOP_LEN-1
-	jruge envelopUpdateEnd$
-	ldw x,y
-	ldw x,(pEnvelopePos,x)
+	cp a,#(ENVELOP_LEN-1)
+	jrnc envelopUpdateEnd$
+	ld a,(pEnvelopePos,y)
+	clrw x
+	ld xl,a
 	ld a,(_EnvelopeTable,x)
 	ld (pEnvelopeLevel,y),a
 	inc (pEnvelopePos,y)
@@ -199,25 +200,25 @@ ret
 
 _NoteOnAsm:
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
-	; void NoteOn(Synthesizer* synth,uint8_t note)
-	; {
-	; 	uint8_t lastSoundUnit = synth->lastSoundUnit;
+	;void NoteOn(Synthesizer* synth,uint8_t note)
+	;{
+	;	uint8_t lastSoundUnit = synth->lastSoundUnit;
 
-	; 	disable_interrupts();
-	; 	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note&0x7F];
-	; 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
-	; 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
-	; 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
-	; 	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
-	; 	enable_interrupts();
+	;	disable_interrupts();
+	;	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note&0x7F];
+	;	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
+	;	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
+	;	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
+	;	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
+	;	enable_interrupts();
 
-	; 	if (lastSoundUnit + 1 == POLY_NUM)
-	; 		lastSoundUnit = 0;
-	; 	else
-	; 		lastSoundUnit++;
+	;	lastSoundUnit++;
 
-	;     synth->lastSoundUnit=lastSoundUnit;
-	; }
+	;	if (lastSoundUnit== POLY_NUM)
+	;		lastSoundUnit = 0;
+
+	;	synth->lastSoundUnit=lastSoundUnit;
+	;}
 	ldw x,#SoundUnitSize
 	ld a,(pLastSoundUnit,y)
 	mul x,a
@@ -233,19 +234,20 @@ _NoteOnAsm:
 	clr (pWavetablePos_frac,y)
 	clr (pWavetablePos_int_h,y)
 	clr (pWavetablePos_int_l,y)
+	clr (pEnvelopePos,y)
 	ld a,#255
 	ld (pEnvelopeLevel,y),a
 	rim ;enable interrput
 
 	ldw y,(0x03, sp)
 	ld a,(pLastSoundUnit,y)
-	cp a,#(POLY_NUM-1)
+	inc a
+	cp a,#POLY_NUM
 	jrne lastSoundUnitUpdateEndNotEq$
-	clr (pLastSoundUnit,y)
-	jra lastSoundUnitUpdateEnd$
+	clr a
 lastSoundUnitUpdateEndNotEq$:
-	inc (pLastSoundUnit,y)
-lastSoundUnitUpdateEnd$:
+	ld (pLastSoundUnit,y),a
+
 
 ret
 
