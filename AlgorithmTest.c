@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+
 #define TEST_LOOP_NUN 200
 
 Synthesizer synthesizerC;
@@ -13,6 +14,11 @@ void TestInit(void)
 {
     SynthInit(&synthesizerC);
     SynthInit(&synthesizerASM);
+}
+
+int16_t abs_u16(int16_t num)
+{
+    return num>0?num:-num;
 }
 
 void PrintParameters(Synthesizer* synth)
@@ -71,6 +77,7 @@ void TestUpdateTickFunc(void)
     uint32_t i;
     Player player;
     PlayerInit(&player);
+    printf("~~~~~~~Start testing updateTickFunc.~~~~~~~\n");
     for(i=0;i<0xffffffff;i++)
     {
         if(i!=player.currentTick)
@@ -85,9 +92,49 @@ void TestUpdateTickFunc(void)
 
 }
 
-void TestProcess(void)
+void SynthParamterCompare(Synthesizer* synthA,Synthesizer* synthB)
 {
-    TestInit();
+    uint8_t error=0;
+    SoundUnitUnion* sa=&(synthA->SoundUnitUnionList[0]);
+    SoundUnitUnion* sb=&(synthB->SoundUnitUnionList[0]);
+
+    if(abs_u16(synthA->mixOut-synthB->mixOut)>POLY_NUM)
+        error++;
+    for(uint8_t k=0;k<POLY_NUM;k++)
+    {
+        if(abs_u16(sa[k].combine.val-sb[k].combine.val)>2)
+            error++;
+        if(sa[k].combine.sampleVal!=sb[k].combine.sampleVal)
+            error++;
+        if(sa[k].combine.envelopeLevel!=sb[k].combine.envelopeLevel)
+            error++;
+        if(sa[k].combine.envelopePos!=sb[k].combine.envelopePos)
+            error++;
+        if(sa[k].combine.wavetablePos_frac!=sb[k].combine.wavetablePos_frac)
+            error++;
+        if(sa[k].combine.wavetablePos_int!=sb[k].combine.wavetablePos_int)
+            error++;
+        if(sa[k].combine.increment!=sb[k].combine.increment)
+            error++;
+    }
+    if(error>0)
+    {
+        printf("%d error(s) found:\n",error);
+        printf("Synth C:\n");
+        PrintParameters(&synthesizerC);
+        printf("Synth ASM:\n");
+        PrintParameters(&synthesizerASM);
+    }
+    else
+    {
+        printf("Passed.\n");
+    }
+    
+}
+
+void TestSynth(void)
+{
+    printf("~~~~~~~Start testing synthesizer.~~~~~~~\n");
     for(uint8_t i=0;i<POLY_NUM;i++)
     {
         NoteOn(&synthesizerC,i%56);
@@ -100,9 +147,13 @@ void TestProcess(void)
         GenDecayEnvlope(&synthesizerC);
         GenDecayEnvlopeAsm(&synthesizerASM);
         printf("=============%d==============\n",i);
-        printf("Synth C:\n");
-        PrintParameters(&synthesizerC);
-        printf("Synth ASM:\n");
-        PrintParameters(&synthesizerASM);
+        SynthParamterCompare(&synthesizerC,&synthesizerASM);
     }
+}
+
+void TestProcess(void)
+{
+    TestInit();
+    TestUpdateTickFunc();
+    TestSynth();
 }
