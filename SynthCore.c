@@ -19,8 +19,8 @@ void SynthInit(Synthesizer* synth)
 	}
     synth->lastSoundUnit=0;
 }
-
-void NoteOn(Synthesizer* synth,uint8_t note)
+#ifdef RUN_TEST
+void NoteOnC(Synthesizer* synth,uint8_t note)
 {
 	uint8_t lastSoundUnit = synth->lastSoundUnit;
 
@@ -61,7 +61,7 @@ void SynthC(Synthesizer* synth)
     }
 }
 
-void GenDecayEnvlope(Synthesizer* synth)
+void GenDecayEnvlopeC(Synthesizer* synth)
 {
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
 	for (uint8_t i = 0; i < POLY_NUM; i++)
@@ -74,3 +74,4 @@ void GenDecayEnvlope(Synthesizer* synth)
 		}
 	}
 }
+#endif

@@ -1,5 +1,5 @@
 .module SYNTH
-.globl _Synth
+.globl _SynthAsm
 .globl _GenDecayEnvlopeAsm
 .globl _NoteOnAsm
 ;typedef struct _SoundUnit
@@ -39,7 +39,7 @@ pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 
 ENVELOP_LEN=256
-POLY_NUM=6
+POLY_NUM=5
 WAVETABLE_ATTACK_LEN=1630
 WAVETABLE_LEN=1758
 WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
@@ -51,7 +51,7 @@ REG_TIM2_CCR3L=0x316+0x5000;
 
 .area CODE
 
-_Synth:
+_SynthAsm:
 
 	clr a				
 	push a			; Keep a loop index in stack

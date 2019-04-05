@@ -11,10 +11,7 @@ extern unsigned char Score[];
 
 void Player32kProc(Player *player)
 {
-    Synth(&(player->mainSynthesizer));
-    // player->currentTick++;
-    // if(player->decayGenTick<200)
-    //     player->decayGenTick+=1;
+    SynthAsm(&(player->mainSynthesizer));
     UpdateTick(player);
 }
 
@@ -56,6 +53,7 @@ void PlayerPlay(Player *player)
     player->lastScoreTick = 0;
     player->decayGenTick = 0;
     player->scorePointer = Score;
+    PlayUpdateNextScoreTick(player);
     player->status = STATUS_PLAYING;
 }
 

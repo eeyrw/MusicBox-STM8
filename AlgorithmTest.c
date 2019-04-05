@@ -1,8 +1,8 @@
+#ifdef RUN_TEST
 #include "SynthCore.h"
 #include "Player.h"
 #include <stdint.h>
 #include <stdio.h>
-
 
 #define TEST_LOOP_NUN 10000
 
@@ -177,3 +177,4 @@ void TestProcess(void)
     TestUpdateTickFunc();
     TestSynth();
 }
+#endif
