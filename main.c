@@ -23,12 +23,16 @@ void timer_isr() __interrupt(TIM4_ISR)
 	MEASURE_E;
 }
 
+void uart1_isr() __interrupt(UART1_RXC_ISR)
+{
+	NoteOnAsm(&(mainPlayer.mainSynthesizer),UART1_DR&0b00111111);
+}
+
 void HardwareInit(void)
 {
 	CLK_CKDIVR = 0x00;
 	uart_init();
-
-
+	UART1_CR2 |= (1 << 5);
 	/* Set PD3 as output */
 	PB_DDR |= (1 << OUTPUT_PIN);
 	PB_CR1 |= (1 << OUTPUT_PIN);
@@ -46,11 +50,11 @@ void HardwareInit(void)
 	TIM4_CR1 |= (1 << TIM4_CR1_CEN); // Enable TIM4
 
 
-   TIM2_CCMR3 |=   0X70;   //设置定时器2三通道(PD2)输出比较三模式
+    TIM2_CCMR3 |=   0X70;   //设置定时器2三通道(PD2)输出比较三模式
     TIM2_CCMR3 |= 0X04;     //输出比较3预装载使能
 
 
-   TIM2_CCMR2 |=   0X70;   //设置定时器2二通道(PD3)输出比较三模式
+    TIM2_CCMR2 |=   0X70;   //设置定时器2二通道(PD3)输出比较三模式
     TIM2_CCMR2 |= 0X04;     //输出比较3预装载使能
 
 
@@ -72,11 +76,6 @@ void HardwareInit(void)
 
     TIM2_IER = 0x00; 
 	TIM2_CR1 |= 0x81;
-/*设置为推挽输出,PD2接了LED灯*/
-
-    PA_DDR |= 0X08;             //设置PA3端口为输出模式
-    PA_CR1 |= 0X08;             //设置PA3端口为推挽输出模式
-    //PA_CR2 |= 0XF7;
 
 	PD_DDR |=(1<<2|1<<3);
 	PD_CR1 |=(1<<2|1<<3);
@@ -86,19 +85,16 @@ void HardwareInit(void)
 
 void main()
 {
-
 	PlayerInit(&mainPlayer);
 	HardwareInit();
+#ifndef RUN_TEST
 	PlayerPlay(&mainPlayer);
-	//TestProcess();
+#else
+	TestProcess();
+#endif
 
 	while (1)
 	{
-		for (uint8_t i = 0; i < 56; i++)
-		{
-			//NoteOn(&(mainPlayer.mainSynthesizer),i);
-			//delay_ms(20);
-		}
 		PlayerProcess(&mainPlayer);
 	}
 }

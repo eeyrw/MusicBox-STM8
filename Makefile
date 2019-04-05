@@ -21,7 +21,7 @@ OBJCOPY  = sdobjcopy
 ASFLAGS  = -plosgff
 CFLAGS   = -m$(ARCH) -p$(MCU) --std-sdcc11
 CFLAGS  += -DF_CPU=$(F_CPU)UL -I. -I$(LIBDIR)
-CFLAGS  += --stack-auto --noinduction --use-non-free
+CFLAGS  += --stack-auto --use-non-free
 ## Disable lospre (workaround for bug 2673)
 #CFLAGS  += --nolospre
 ## Extra optimization rules - use with care
