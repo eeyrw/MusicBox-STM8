@@ -47,9 +47,14 @@ pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 ENVELOP_LEN=256
 POLY_NUM=5
-WAVETABLE_ATTACK_LEN=1630
-WAVETABLE_LEN=1758
-WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
+
+WAVETABLE_CELESTA_C5_LEN=2608
+WAVETABLE_CELESTA_C5_ATTACK_LEN=1998
+WAVETABLE_CELESTA_C5_LOOP_LEN=610
+
+WAVETABLE_CELESTA_C6_LEN=1358
+WAVETABLE_CELESTA_C6_ATTACK_LEN=838
+WAVETABLE_CELESTA_C6_LOOP_LEN=520
 
 
 REG_TIM2_CCR2L=0x314+0x5000;
@@ -254,7 +259,7 @@ _NoteOnAsm:
 	clrw x
 	ld xl,a
 	sim ;disable interrupt
-	ldw x,(_PitchIncrementTable,x)
+	ldw x,(_WaveTable_Celesta_C5_Increment,x)
 	ldw (pIncrement_int,y),x
 	clr (pWavetablePos_frac,y)
 	clr (pWavetablePos_int_h,y)
@@ -263,13 +268,13 @@ _NoteOnAsm:
 	ld a,#255
 	ld (pEnvelopeLevel,y),a
 
-	ldw x,#_WaveTable
+	ldw x,#_WaveTable_Celesta_C5
 	ldw (pWaveTableAddress,y),x
-	ldw x,#WAVETABLE_LEN
+	ldw x,#WAVETABLE_CELESTA_C5_LEN
 	ldw (pWaveTableLen,y),x
-	ldw x,#WAVETABLE_ATTACK_LEN
+	ldw x,#WAVETABLE_CELESTA_C5_ATTACK_LEN
 	ldw (pWaveTableAttackLen,y),x
-	ldw x,#WAVETABLE_LOOP_LEN
+	ldw x,#WAVETABLE_CELESTA_C5_LOOP_LEN
 	ldw (pWaveTableLoopLen,y),x
 
 	rim ;enable interrput

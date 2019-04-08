@@ -31,7 +31,7 @@ def readWaveSamples(file_path):
 def calcIncrement(baseFreq,targetFreq):
     return targetFreq/baseFreq   
 
-def exportToSourceFile(sampleName,attackSamples,loopSamples,fileDir,sampleWidth):
+def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleWidth):
     waveTableIdentifer="WaveTable_%s"%sampleName
     attackLen=len(attackSamples)
     loopLen=len(loopSamples)
@@ -80,7 +80,7 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,fileDir,sampleWidth)
         cFile.write("const uint16_t %s_Increment[]={\n"%waveTableIdentifer)
         newLineCounter=0
         for i in range(57,120):
-            cFile.write("%5d,"%(calcIncrement(523.25,noteToFreq(i))*255))
+            cFile.write("%5d,"%(calcIncrement(freq,noteToFreq(i))*255))
             if newLineCounter>8:
                 newLineCounter=0
                 cFile.write("\n")
@@ -91,9 +91,11 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,fileDir,sampleWidth)
 
 
 def main():
-    attackSamples=readWaveSamples("./WaveTableUtils/Celesta_C5_ATTACK.wav")	
-    loopSamples=readWaveSamples("./WaveTableUtils/Celesta_C5_LOOP.wav")
-    exportToSourceFile("Celesta_C5",attackSamples,loopSamples,'./WaveTableUtils/',1)
+    sampleName="Celesta_C6"
+    sampleFreq=1046.502
+    attackSamples=readWaveSamples("./WaveTableUtils/%s_ATTACK.wav"%sampleName)	
+    loopSamples=readWaveSamples("./WaveTableUtils/%s_LOOP.wav"%sampleName)
+    exportToSourceFile(sampleName,attackSamples,loopSamples,sampleFreq,'./WaveTableUtils/',1)
     
 if __name__ == "__main__":
 	main()

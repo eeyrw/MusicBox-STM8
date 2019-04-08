@@ -1,7 +1,8 @@
 #include "SynthCore.h"
 #include <stdint.h>
 #include <stdio.h>
-#include "constantTable.h"
+#include "WaveTable_Celesta_C5.h"
+#include "WaveTable_Celesta_C6.h"
 #include "stm8s.h"
 
 
@@ -16,10 +17,10 @@ void SynthInit(Synthesizer* synth)
 		soundUnionList[i].combine.envelopeLevel = 255;
 		soundUnionList[i].combine.envelopePos = 0;
         soundUnionList[i].combine.val = 0;
-		soundUnionList[i].combine.waveTableAddress = (uint16_t)WaveTable;
-		soundUnionList[i].combine.waveTableLen = WAVETABLE_LEN;
-		soundUnionList[i].combine.waveTableLoopLen = WAVETABLE_LOOP_LEN;
-		soundUnionList[i].combine.waveTableAttackLen = WAVETABLE_ATTACK_LEN;
+		soundUnionList[i].combine.waveTableAddress = (uint16_t)WaveTable_Celesta_C5;
+		soundUnionList[i].combine.waveTableLen = WAVETABLE_CELESTA_C5_LEN;
+		soundUnionList[i].combine.waveTableLoopLen = WAVETABLE_CELESTA_C5_LOOP_LEN;
+		soundUnionList[i].combine.waveTableAttackLen = WAVETABLE_CELESTA_C5_ATTACK_LEN;
 	}
     synth->lastSoundUnit=0;
 }
@@ -29,13 +30,13 @@ void NoteOnC(Synthesizer* synth,uint8_t note)
 	uint8_t lastSoundUnit = synth->lastSoundUnit;
 
 	disable_interrupts();
-	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note&0x7F];
+	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = WaveTable_Celesta_C5_Increment[note&0x7F];
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAddress = (uint16_t)WaveTable;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLen = WAVETABLE_LEN;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLoopLen = WAVETABLE_LOOP_LEN;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAttackLen = WAVETABLE_ATTACK_LEN;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAddress = (uint16_t)WaveTable_Celesta_C5;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLen = WAVETABLE_CELESTA_C5_LEN;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLoopLen = WAVETABLE_CELESTA_C5_LOOP_LEN;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAttackLen = WAVETABLE_CELESTA_C5_ATTACK_LEN;
 
 	enable_interrupts();
 
