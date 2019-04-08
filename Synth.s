@@ -69,7 +69,6 @@ _SynthAsm:
 	push a			; Keep a loop index in stack
 	clrw x
 	pushw x				; Keep temporary 16bit variable in stack
-	pushw x				; Keep temporary 16bit variable in stack
 	pushw x				; Keep mixOut result in stack
 	; The stack layout is:
 	; (0x01,sp)=mixOut
@@ -84,9 +83,6 @@ _SynthAsm:
 	pSynthObjAddr=8
 	
 	ldw y,(pSynthObjAddr, sp) 	; Load sound unit pointer to register Y.
-	ldw x,y
-	ldw x,(pWaveTableAddress,x)
-	ldw (pTempU16,sp),x
 
 loopSynth$:
 	ld a,(pLoopIndex,sp)
@@ -179,7 +175,7 @@ branch_lt_gt_end$:
 	cpl a
 	ld REG_TIM2_CCR3L,a	
 
-	addw sp,#3
+	addw sp,#5
 
 	ret
 
