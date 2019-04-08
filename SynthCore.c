@@ -32,8 +32,11 @@ void NoteOnC(Synthesizer* synth,uint8_t note)
 	synth->SoundUnitUnionList[lastSoundUnit].combine.increment = PitchIncrementTable[note&0x7F];
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_frac = 0;
 	synth->SoundUnitUnionList[lastSoundUnit].combine.wavetablePos_int = 0;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopePos = 0;
-	synth->SoundUnitUnionList[lastSoundUnit].combine.envelopeLevel = 255;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAddress = (uint16_t)WaveTable;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLen = WAVETABLE_LEN;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableLoopLen = WAVETABLE_LOOP_LEN;
+	synth->SoundUnitUnionList[lastSoundUnit].combine.waveTableAttackLen = WAVETABLE_ATTACK_LEN;
+
 	enable_interrupts();
 
 	lastSoundUnit++;
@@ -48,17 +51,19 @@ void SynthC(Synthesizer* synth)
 {
     synth->mixOut=0;
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
+	int8_t* pWaveTable;
     for(uint8_t i=0;i<POLY_NUM;i++)
     {
-        soundUnionList[i].combine.val=soundUnionList[i].combine.envelopeLevel*WaveTable[soundUnionList[i].combine.wavetablePos_int]/255;
-        soundUnionList[i].combine.sampleVal=WaveTable[soundUnionList[i].combine.wavetablePos_int];
+		pWaveTable=(int8_t*)soundUnionList[i].combine.waveTableAddress;
+        soundUnionList[i].combine.val=soundUnionList[i].combine.envelopeLevel*pWaveTable[soundUnionList[i].combine.wavetablePos_int]/255;
+        soundUnionList[i].combine.sampleVal=pWaveTable[soundUnionList[i].combine.wavetablePos_int];
 		uint32_t waveTablePos=soundUnionList[i].combine.increment+
                              soundUnionList[i].combine.wavetablePos_frac+
                              ((uint32_t)soundUnionList[i].combine.wavetablePos_int<<8); 
 
         uint16_t waveTablePosInt= waveTablePos>>8;
-        if(waveTablePosInt>WAVETABLE_LEN)
-           waveTablePosInt-=WAVETABLE_LOOP_LEN;
+        if(waveTablePosInt>soundUnionList[i].combine.waveTableLen)
+           waveTablePosInt-=soundUnionList[i].combine.waveTableLoopLen;
         soundUnionList[i].combine.wavetablePos_int= waveTablePosInt;
         soundUnionList[i].combine.wavetablePos_frac=0xFF&waveTablePos;
         synth->mixOut+=soundUnionList[i].combine.val;
@@ -70,7 +75,7 @@ void GenDecayEnvlopeC(Synthesizer* synth)
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
 	for (uint8_t i = 0; i < POLY_NUM; i++)
 	{
-		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
+		if(soundUnionList[i].combine.wavetablePos_int >= soundUnionList[i].combine.waveTableAttackLen &&
 				soundUnionList[i].combine.envelopePos <sizeof(EnvelopeTable)-1)
 		{
 			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
