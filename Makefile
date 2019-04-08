@@ -8,8 +8,18 @@ TARGET  ?= main.ihx
 
 LIBDIR   = ./stm8
 
-SRCS    := $(wildcard *.c $(LIBDIR)/*.c)
-ASRCS   := $(wildcard *.s $(LIBDIR)/*.s)
+SRCS 	+= main.c
+SRCS 	+= AlgorithmTest.c
+SRCS 	+= SynthCore.c
+SRCS 	+= Player.c
+SRCS 	+= UartRedirect.c
+SRCS 	+= constTable.c
+SRCS 	+= score.c
+SRCS 	+= $(LIBDIR)/delay.c
+SRCS 	+= $(LIBDIR)/uart.c
+
+ASRCS   += PlayerUtil.s
+ASRCS   += Synth.s
 
 OBJS     = $(SRCS:.c=.rel)
 OBJS    += $(ASRCS:.s=.rel)
@@ -28,7 +38,7 @@ CFLAGS  += --stack-auto --use-non-free
 #CFLAGS  += --peep-file $(LIBDIR)/util/extra.def
 LDFLAGS  = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
 
-all: $(TARGET) size
+all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@
@@ -38,12 +48,6 @@ $(TARGET): $(OBJS)
 
 %.rel: %.s
 	$(AS) $(ASFLAGS) $<
-
-size:
-	@$(OBJCOPY) -I ihex --output-target=binary $(TARGET) $(TARGET).bin
-	@echo "----------"
-	@echo "Image size:"
-##@stat -L -c %s $(TARGET).bin
 
 flash: $(TARGET)
 	./stm8flash -c stlinkv2 -p $(MCU) -w $(TARGET)
