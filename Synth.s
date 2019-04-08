@@ -259,15 +259,23 @@ _NoteOnAsm:
 	clrw x
 	ld xl,a
 	sim ;disable interrupt
+	cp a,#80*2
+	jrc branch_low_pitch$
+	ldw x,(_WaveTable_Celesta_C6_Increment,x)
+	ldw (pIncrement_int,y),x
+	ldw x,#_WaveTable_Celesta_C6
+	ldw (pWaveTableAddress,y),x
+	ldw x,#WAVETABLE_CELESTA_C6_LEN
+	ldw (pWaveTableLen,y),x
+	ldw x,#WAVETABLE_CELESTA_C6_ATTACK_LEN
+	ldw (pWaveTableAttackLen,y),x
+	ldw x,#WAVETABLE_CELESTA_C6_LOOP_LEN
+	ldw (pWaveTableLoopLen,y),x
+	jra branch_low_pitch_end$
+
+branch_low_pitch$:
 	ldw x,(_WaveTable_Celesta_C5_Increment,x)
 	ldw (pIncrement_int,y),x
-	clr (pWavetablePos_frac,y)
-	clr (pWavetablePos_int_h,y)
-	clr (pWavetablePos_int_l,y)
-	clr (pEnvelopePos,y)
-	ld a,#255
-	ld (pEnvelopeLevel,y),a
-
 	ldw x,#_WaveTable_Celesta_C5
 	ldw (pWaveTableAddress,y),x
 	ldw x,#WAVETABLE_CELESTA_C5_LEN
@@ -276,6 +284,14 @@ _NoteOnAsm:
 	ldw (pWaveTableAttackLen,y),x
 	ldw x,#WAVETABLE_CELESTA_C5_LOOP_LEN
 	ldw (pWaveTableLoopLen,y),x
+branch_low_pitch_end$:
+
+	clr (pWavetablePos_frac,y)
+	clr (pWavetablePos_int_h,y)
+	clr (pWavetablePos_int_l,y)
+	clr (pEnvelopePos,y)
+	ld a,#255
+	ld (pEnvelopeLevel,y),a
 
 	rim ;enable interrput
 
