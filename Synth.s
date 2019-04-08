@@ -12,10 +12,6 @@
 ;	uint8_t envelopePos;
 ;	int16_t val;
 ;	int8_t sampleVal;
-;	uint16_t waveTableAddress;
-;	uint16_t waveTableLen;
-;	uint16_t waveTableLoopLen;
-;	uint16_t waveTableAttackLen;
 ;} SoundUnit;
 
 
@@ -26,7 +22,7 @@
 ;    uint8_t lastSoundUnit;
 ;}Synthesizer;
 
-SoundUnitSize=18
+SoundUnitSize=10
 
 pIncrement_int=0
 pIncrement_frac=1
@@ -37,10 +33,7 @@ pEnvelopeLevel=5
 pEnvelopePos=6
 pVal=7
 pSampleVal=9
-pWaveTableAddress=10
-pWaveTableLen=12
-pWaveTableLoopLen=14
-pWaveTableAttackLen=16
+
 pMixOut=SoundUnitSize*POLY_NUM
 pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
@@ -63,43 +56,25 @@ _SynthAsm:
 	clr a				
 	push a			; Keep a loop index in stack
 	clrw x
-	pushw x				; Keep temporary 16bit variable in stack
-	pushw x				; Keep temporary 16bit variable in stack
 	pushw x				; Keep mixOut result in stack
 	; The stack layout is:
 	; (0x01,sp)=mixOut
-	; (0x03,sp)=tempU16
-	; (0x05,sp)=loop index
-	; (0x06,sp)=PCH
-	; (0x07,sp)=PCL
-	; (0x08,sp)=synthesizer object's address.
-	pMixOutTemp=1
-	pTempU16=3
-	pLoopIndex=5
-	pSynthObjAddr=8
+	; (0x03,sp)=loop index
+	; (0x04,sp)=PCH
+	; (0x05,sp)=PCL
+	; (0x06,sp)=synthesizer object's address.
 	
-	ldw y,(pSynthObjAddr, sp) 	; Load sound unit pointer to register Y.
-	ldw x,y
-	ldw x,(pWaveTableAddress,x)
-	ldw (pTempU16,sp),x
+	ldw y,(0x06, sp) 	; Load sound unit pointer to register Y.
 
 loopSynth$:
-	ld a,(pLoopIndex,sp)
+	ld a,(0x03,sp)
     cp a,#POLY_NUM
     jreq loopSynth_end$
 ; loop body
 		ldw x,y
 		ldw x,(pWavetablePos_int_h,x)	; Get a sample by pWavetablePos_int and save to a
-		ldw (pTempU16,sp),x
-		ldw x,y
-		ldw x,(pWaveTableAddress,x)
-		addw x,(pTempU16,sp)
-		ld a,(x)
+		ld a,(_WaveTable,x)
 		ld (pSampleVal,y),a
-
-		ldw x,y
-		ldw x,(pWaveTableLoopLen,x)
-		ldw (pTempU16,sp),x
 
 		ld a,(pEnvelopeLevel,y); Load evnvlopelevel to xl
 		ld xl,a
@@ -121,11 +96,10 @@ loopSynth$:
 		negw x
 	branch2_end$:
 
-
 		ldw (pVal,y),x
 
-		addw x,(pMixOutTemp,sp)
-		ldw (pMixOutTemp,sp),x
+		addw x,(0x01,sp)
+		ldw (0x01,sp),x
 
 		; Do calculation :[pWavetablePos]+=[pIncrement]
 		ld a,(pIncrement_frac,y) ; Get frac part of increment.
@@ -143,19 +117,19 @@ loopSynth$:
 		ld xh,a   ; Let X hold value of integer part of wavetablePos
 
 	branch0_start$:
-		cpw x,(pWaveTableLen,y) 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
+		cpw x,#WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
 		jrc branch0_end$			; Jump if WAVETABLE_LEN is great than x
-		subw x,(pTempU16,sp) ; Subtract x with WAVETABLE_LOOP_LEN
+		subw x,#WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
 	branch0_end$:
 		ldw (pWavetablePos_int_h,y),x ;
 						
-    inc (pLoopIndex,sp)
+    inc (0x03,sp)
 	addw y,#SoundUnitSize
     jra loopSynth$
 
 loopSynth_end$:
-	ldw y,(pSynthObjAddr, sp) 
-	ldw x,(pMixOutTemp,sp)
+	ldw y,(0x06, sp) 
+	ldw x,(0x01,sp)
 	ldw (pMixOut,y),x
 	;sraw x
 	cpw x,#253
@@ -181,7 +155,6 @@ branch_lt_gt_end$:
 _GenDecayEnvlopeAsm:
 	clr a				; Register A as loop index.
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
-
 loopGenDecayEnvlope$:
     cp a,#POLY_NUM
     jreq loopGenDecayEnvlope_end$
@@ -201,7 +174,7 @@ loopGenDecayEnvlope$:
 
 	ldw x,y
 	ldw x,(pWavetablePos_int_h,x)
-	cpw x,(pWaveTableAttackLen,y)
+	cpw x,#WAVETABLE_ATTACK_LEN
 	jrc envelopUpdateEnd$
 	ld a,(pEnvelopePos,y)
 	cp a,#(ENVELOP_LEN-1)
@@ -262,16 +235,6 @@ _NoteOnAsm:
 	clr (pEnvelopePos,y)
 	ld a,#255
 	ld (pEnvelopeLevel,y),a
-
-	ldw x,#_WaveTable
-	ldw (pWaveTableAddress,y),x
-	ldw x,#WAVETABLE_LEN
-	ldw (pWaveTableLen,y),x
-	ldw x,#WAVETABLE_ATTACK_LEN
-	ldw (pWaveTableAttackLen,y),x
-	ldw x,#WAVETABLE_LOOP_LEN
-	ldw (pWaveTableLoopLen,y),x
-
 	rim ;enable interrput
 
 	ldw y,(0x03, sp)
