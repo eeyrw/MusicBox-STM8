@@ -16,6 +16,10 @@ void SynthInit(Synthesizer* synth)
 		soundUnionList[i].combine.envelopeLevel = 255;
 		soundUnionList[i].combine.envelopePos = 0;
         soundUnionList[i].combine.val = 0;
+		soundUnionList[i].combine.waveTableAddress = (uint16_t)WaveTable;
+		soundUnionList[i].combine.waveTableLen = WAVETABLE_LEN;
+		soundUnionList[i].combine.waveTableLoopLen = WAVETABLE_LOOP_LEN;
+		soundUnionList[i].combine.waveTableAttackLen = WAVETABLE_ATTACK_LEN;
 	}
     synth->lastSoundUnit=0;
 }

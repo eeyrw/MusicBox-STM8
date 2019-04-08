@@ -14,6 +14,11 @@ typedef struct _SoundUnit
 	uint8_t envelopePos;
 	int16_t val;
 	int8_t sampleVal;
+	uint16_t waveTableAddress;
+	uint16_t waveTableLen;
+	uint16_t waveTableLoopLen;
+	uint16_t waveTableAttackLen;
+
 } SoundUnit;
 
 typedef struct _SoundUnitSplit
@@ -26,6 +31,10 @@ typedef struct _SoundUnitSplit
 	uint8_t envelopePos;
 	int16_t val;
 	int8_t sampleVal;
+	uint16_t waveTableAddress;
+	uint16_t waveTableLen;
+	uint16_t waveTableLoopLen;
+	uint16_t waveTableAttackLen;	
 } SoundUnitSplit;
 
 
