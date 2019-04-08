@@ -4,6 +4,7 @@
 #include "WaveTable_Celesta_C5.h"
 #include "WaveTable_Celesta_C6.h"
 #include "stm8s.h"
+#include "EnvelopeTable.h"
 
 
 void SynthInit(Synthesizer* synth)
@@ -63,7 +64,7 @@ void SynthC(Synthesizer* synth)
                              ((uint32_t)soundUnionList[i].combine.wavetablePos_int<<8); 
 
         uint16_t waveTablePosInt= waveTablePos>>8;
-        if(waveTablePosInt>soundUnionList[i].combine.waveTableLen)
+        if(waveTablePosInt>=soundUnionList[i].combine.waveTableLen)
            waveTablePosInt-=soundUnionList[i].combine.waveTableLoopLen;
         soundUnionList[i].combine.wavetablePos_int= waveTablePosInt;
         soundUnionList[i].combine.wavetablePos_frac=0xFF&waveTablePos;
@@ -76,7 +77,7 @@ void GenDecayEnvlopeC(Synthesizer* synth)
     SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
 	for (uint8_t i = 0; i < POLY_NUM; i++)
 	{
-		if(soundUnionList[i].combine.wavetablePos_int >= soundUnionList[i].combine.waveTableAttackLen &&
+		if(soundUnionList[i].combine.wavetablePos_int >=soundUnionList[i].combine.waveTableAttackLen &&
 				soundUnionList[i].combine.envelopePos <sizeof(EnvelopeTable)-1)
 		{
 			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
