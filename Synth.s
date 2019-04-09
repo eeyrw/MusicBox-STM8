@@ -171,8 +171,6 @@ branch_lt_gt_end$:
 	sraw x
 	ld a,xl
 	sub a,#0x80
-	ld REG_TIM2_CCR2L,a
-	cpl a
 	ld REG_TIM2_CCR3L,a	
 
 	addw sp,#5
