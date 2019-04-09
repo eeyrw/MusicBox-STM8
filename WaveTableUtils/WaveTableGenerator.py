@@ -49,6 +49,8 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
     with open(hFilePath,'w') as hFile:
         hFile.write("#ifndef __%s__\n#define __%s__\n"%(str.upper(waveTableIdentifer),str.upper(waveTableIdentifer)))
         hFile.write("#include <stdint.h>\n")
+        hFile.write("// Sample's base frequency: %f Hz\n"%freq)
+        hFile.write("// Sample's sample rate: %d Hz\n"%32000)
         hFile.write("#define %s_LEN %d\n"%(str.upper(waveTableIdentifer),totalLen))
         hFile.write("#define %s_ATTACK_LEN %d\n"%(str.upper(waveTableIdentifer),attackLen))
         hFile.write("#define %s_LOOP_LEN %d\n"%(str.upper(waveTableIdentifer),loopLen))
@@ -58,11 +60,13 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
 
     with open(cFilePath,'w') as cFile:
         cFile.write("#include <stdint.h>\n#include <%s.h>\n"%waveTableIdentifer)
+        cFile.write("// Sample's base frequency: %f Hz\n"%freq)
+        cFile.write("// Sample's sample rate: %d Hz\n"%32000)
         cFile.write("const %s %s[%s_LEN]={\n"%(sampleType,waveTableIdentifer,str.upper(waveTableIdentifer)))
         newLineCounter=0
         cFile.write("// Attack Samples:\n")
         for sample in attackSamples:
-            cFile.write("%8d,"%sample)
+            cFile.write("%6d,"%sample)
             if newLineCounter>8:
                 newLineCounter=0
                 cFile.write("\n")
@@ -70,17 +74,17 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
                 newLineCounter+=1
         cFile.write("\n// Loop Samples:\n")
         for sample in loopSamples:
-            cFile.write("%8d,"%sample)
+            cFile.write("%6d,"%sample)
             if newLineCounter>8:
                 newLineCounter=0
                 cFile.write("\n")
             else:
                 newLineCounter+=1        
-        cFile.write("};\n")
+        cFile.write("};\n\n")
         cFile.write("const uint16_t %s_Increment[]={\n"%waveTableIdentifer)
         newLineCounter=0
         for i in range(57,120):
-            cFile.write("%5d,"%(calcIncrement(freq,noteToFreq(i))*255))
+            cFile.write("%6d,"%(calcIncrement(freq,noteToFreq(i))*255))
             if newLineCounter>8:
                 newLineCounter=0
                 cFile.write("\n")
