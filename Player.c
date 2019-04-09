@@ -36,6 +36,7 @@ void PlayerProcess(Player *player)
                 if (temp == 0xFF)
                 {
                     player->status = STATUS_STOP;
+                    DISABLE_AMPLIFIER;
                 }
                 else
                 {
@@ -55,6 +56,8 @@ void PlayerPlay(Player *player)
     player->scorePointer = Score;
     PlayUpdateNextScoreTick(player);
     player->status = STATUS_PLAYING;
+    ENABLE_AMPLIFIER;
+
 }
 
 void PlayerInit(Player *player)
@@ -65,4 +68,5 @@ void PlayerInit(Player *player)
     player->decayGenTick = 0;
     player->scorePointer = Score;
     SynthInit(&(player->mainSynthesizer));
+    DISABLE_AMPLIFIER;
 }

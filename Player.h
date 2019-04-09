@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 #include "SynthCore.h"
+#include "stm8s.h"
 
+#define ENABLE_AMPLIFIER PA_ODR |= (1 << 1)
+#define DISABLE_AMPLIFIER PA_ODR &= ~(1 << 1)
 
 enum PLAY_STATUS{
     STATUS_STOP=0,

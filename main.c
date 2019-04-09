@@ -33,9 +33,13 @@ void HardwareInit(void)
 	CLK_CKDIVR = 0x00;
 	uart_init();
 	UART1_CR2 |= (1 << 5);
-	/* Set PD3 as output */
+	/* Set PB5 as output */
 	PB_DDR |= (1 << OUTPUT_PIN);
 	PB_CR1 |= (1 << OUTPUT_PIN);
+
+	/* Set PB1 as output */
+	PA_DDR |= (1 << 1);
+	PA_CR1 |= (1 << 1);	
 
 	PC_DDR |= (1 << 4);
 	PC_CR1 |= (1 << 4);
@@ -79,6 +83,8 @@ void HardwareInit(void)
 
 	PD_DDR |=(1<<2|1<<3);
 	PD_CR1 |=(1<<2|1<<3);
+
+
 	enable_interrupts();
 	
 }
