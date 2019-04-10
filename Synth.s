@@ -255,7 +255,7 @@ _NoteOnAsm:
 	clrw x
 	ld xl,a
 	sim ;disable interrupt
-	cp a,#80*2
+	cp a,#28*2
 	jrc branch_low_pitch$
 	ldw x,(_WaveTable_Celesta_C6_Increment,x)
 	ldw (pIncrement_int,y),x
