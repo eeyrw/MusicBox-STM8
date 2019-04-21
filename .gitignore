@@ -24,3 +24,5 @@ build
 *.rst
 *.cdb
 *.bin
+*.ipch
+.DS_Store
