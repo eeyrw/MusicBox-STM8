@@ -1,6 +1,7 @@
 import wave,struct
 import os
 from math import log2, pow
+import numpy as np
 
 def noteToFreq(note):
     a = 440 #frequency of A (coomon value is 440Hz)
@@ -30,6 +31,27 @@ def readWaveSamples(file_path):
 
 def calcIncrement(baseFreq,targetFreq):
     return targetFreq/baseFreq   
+
+def estimateSampleFreq(samples,sampleRate):
+    estimateFreq=0
+    chunk=len(samples)
+    # use a Blackman window
+    window = np.blackman(chunk)
+    # unpack the data and times by the hamming window
+    indata = np.array(samples)*window
+    # Take the fft and square each value
+    fftData=abs(np.fft.rfft(indata))**2
+    # find the maximum
+    which = fftData[1:].argmax() + 1
+    # use quadratic interpolation around the max
+    if which != len(fftData)-1:
+        y0,y1,y2 = np.log(fftData[which-1:which+2:])
+        x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
+        # find the frequency and output it
+        estimateFreq = (which+x1)*sampleRate/chunk
+    else:
+        estimateFreq = which*sampleRate/chunk
+    return estimateFreq
 
 def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleWidth):
     waveTableIdentifer="WaveTable_%s"%sampleName
@@ -96,10 +118,12 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
 
 def main():
     sampleName="Celesta_C6"
-    sampleFreq=1046.502
     attackSamples=readWaveSamples("./WaveTableUtils/%s_ATTACK.wav"%sampleName)	
     loopSamples=readWaveSamples("./WaveTableUtils/%s_LOOP.wav"%sampleName)
+    sampleFreq=estimateSampleFreq(attackSamples,32000)
+    print("Estimated base frequency:%f Hz"%sampleFreq)
     exportToSourceFile(sampleName,attackSamples,loopSamples,sampleFreq,'./WaveTableUtils/',1)
+    estimateSampleFreq(attackSamples,32000)
     
 if __name__ == "__main__":
 	main()
