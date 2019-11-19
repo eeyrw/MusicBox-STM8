@@ -88,7 +88,7 @@ all: $(OBJECTS) $(PROJECT_NAME).ihx $(PROJECT_NAME).hex $(PROJECT_NAME).bin
 	@$(CP) -I ihex -O binary $< $@
 
 flash: $(PROJECT_NAME).ihx
-	./stm8flash -c stlinkv2 -p $(MCU) -w $(PROJECT_NAME).ihx
+	stm8flash -c stlinkv2 -p $(MCU) -w $(PROJECT_NAME).ihx
 	
 clean:
 	@echo [RM] OBJ
