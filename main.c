@@ -58,18 +58,18 @@ void HardwareInit(void)
 	TIM2_CCER1 |= (0x03 << 4); //通道2使能，低电平有效，配置为输出
 	TIM2_CCER2 |= 0x03;		   //通道3使能，低电平有效，配置为输出
 
-	//初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
+	// Set TIM2 prescaler value to 1
 	TIM2_PSCR = 0X00;
-	//初始化自动装载寄存器，决定PWM 方波的频率，Fpwm=0.125M/62500=2HZ
+	// Initialization of auto-reload register
 	TIM2_ARRH = 0;
 	TIM2_ARRL = 0xFF;
-	//初始化比较寄存器，决定PWM 方波的占空比：5000/10000 = 50%
+	// Set comparison register of TIM2
 	TIM2_CCR3H = 0;
 	TIM2_CCR3L = 122;
 	TIM2_CCR2H = 0;
 	TIM2_CCR2L = 123;
 
-	// 启动计数;更新中断失能
+	// Enable TIM2 and disable interrupt of TIM2
 
 	TIM2_IER = 0x00;
 	TIM2_CR1 |= 0x81;
