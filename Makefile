@@ -4,7 +4,7 @@ CC           = sdcc
 CP           = sdobjcopy
 AS           = sdasstm8
 LD			= sdld
-HEX          = $(CP) -O ihex
+HEX          = packihx
 BIN          = $(CP) -O binary -S
 
 # define mcu, specify the target processor
@@ -66,7 +66,7 @@ LD_FLAGS = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
 #
 # makefile rules
 #
-all: $(OBJECTS) $(PROJECT_NAME).ihx
+all: $(OBJECTS) $(PROJECT_NAME).ihx $(PROJECT_NAME).hex $(PROJECT_NAME).bin
 
 %.rel: %.c Makefile
 	@echo [CC] $(notdir $<)
@@ -79,6 +79,14 @@ all: $(OBJECTS) $(PROJECT_NAME).ihx
 %.ihx: $(OBJECTS)
 	@echo [LD] $(PROJECT_NAME).ihx
 	@$(CC) $(LD_FLAGS) $(OBJECTS) -o $@
+	
+%.hex: %.ihx
+	@echo [HEX] $(PROJECT_NAME).hex
+	@$(HEX) $< > $@	
+	
+%.bin: %.ihx
+	@echo [BIN] $(PROJECT_NAME).bin
+	@$(CP) -I ihex -O binary $< $@
 
 flash: $(PROJECT_NAME).ihx
 	./stm8flash -c stlinkv2 -p $(MCU) -w $(PROJECT_NAME).ihx
@@ -93,3 +101,5 @@ clean:
 	@-rm -rf $(PROJECT_NAME).lk
 	@-rm -rf $(PROJECT_NAME).map	
 	@-rm -rf $(PROJECT_NAME).cdb	
+	@-rm -rf $(PROJECT_NAME).hex
+	@-rm -rf $(PROJECT_NAME).bin
