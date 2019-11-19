@@ -44,7 +44,6 @@ ASM_SRC   += PlayerUtil.s
 ASM_SRC   += Synth.s
 
 
-
 INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
 
 # run from Flash
