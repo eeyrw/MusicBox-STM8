@@ -1,59 +1,95 @@
-export PATH := $(PATH):$(HOME)/local/sdcc/bin
 
-MCU  = stm8s103f3
+# toolchain
+CC           = sdcc
+CP           = sdobjcopy
+AS           = sdasstm8
+LD			= sdld
+HEX          = $(CP) -O ihex
+BIN          = $(CP) -O binary -S
+
+# define mcu, specify the target processor
+F_CPU   ?= 16000000
+MCU          = stm8s103f3
 ARCH = stm8
 
-F_CPU   ?= 16000000
-TARGET  ?= main.ihx
+# all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
+PROJECT_NAME=FreeRTOS
 
-LIBDIR   = ./stm8
+# specify define
+DDEFS       =
 
-SRCS 	+= main.c
-SRCS 	+= AlgorithmTest.c
-SRCS 	+= SynthCore.c
-SRCS 	+= Player.c
-SRCS 	+= UartRedirect.c
-SRCS 	+= WaveTable_Celesta_C5.c
-SRCS 	+= EnvelopTable.c
-SRCS 	+= score.c
-SRCS 	+= $(LIBDIR)/delay.c
-SRCS 	+= $(LIBDIR)/uart.c
+# define root dir
+ROOT_DIR     = .
 
-ASRCS   += PlayerUtil.s
-ASRCS   += Synth.s
+# define include dir
+INCLUDE_DIRS = 
 
-OBJS     = $(SRCS:.c=.rel)
-OBJS    += $(ASRCS:.s=.rel)
+# define stm32f4 lib dir
+LIBDIR   = $(ROOT_DIR)/stm8
 
-CC       = sdcc
-LD       = sdld
-AS       = sdasstm8
-OBJCOPY  = sdobjcopy
+# user specific
+
+SRC 	+= main.c
+SRC 	+= AlgorithmTest.c
+SRC 	+= SynthCore.c
+SRC 	+= Player.c
+SRC 	+= UartRedirect.c
+SRC 	+= WaveTable_Celesta_C5.c
+SRC 	+= EnvelopTable.c
+SRC 	+= score.c
+SRC 	+= $(LIBDIR)/delay.c
+SRC 	+= $(LIBDIR)/uart.c
+
+ASM_SRC   += PlayerUtil.s
+ASM_SRC   += Synth.s
+
+
+
+INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
+
+# run from Flash
+DEFS	 = $(DDEFS)
+
+OBJECTS  = $(ASM_SRC:.s=.rel) $(SRC:.c=.rel)
+OTHER_OUTPUTS += $(ASM_SRC:.s=.asm) $(SRC:.c=.asm)
+OTHER_OUTPUTS += $(ASM_SRC:.s=.lst) $(SRC:.c=.lst)
+OTHER_OUTPUTS += $(ASM_SRC:.s=.rst) $(SRC:.c=.rst)
+OTHER_OUTPUTS += $(ASM_SRC:.s=.sym) $(SRC:.c=.sym)
+
+
+CFLAGS  = -m$(ARCH) -p$(MCU) --std-sdcc11
+CFLAGS += -DF_CPU=$(F_CPU)UL -I. -I$(LIBDIR)
+CFLAGS += --stack-auto --use-non-free
 ASFLAGS  = -plosgff
-CFLAGS   = -m$(ARCH) -p$(MCU) --std-sdcc11
-CFLAGS  += -DF_CPU=$(F_CPU)UL -I. -I$(LIBDIR)
-CFLAGS  += --stack-auto --use-non-free
-## Disable lospre (workaround for bug 2673)
-#CFLAGS  += --nolospre
-## Extra optimization rules - use with care
-#CFLAGS  += --peep-file $(LIBDIR)/util/extra.def
-LDFLAGS  = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
+LD_FLAGS = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
 
-all: $(TARGET)
+#
+# makefile rules
+#
+all: $(OBJECTS) $(PROJECT_NAME).ihx
 
-$(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $@
-
-%.rel: %.c
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+%.rel: %.c Makefile
+	@echo [CC] $(notdir $<)
+	@$(CC) $(CFLAGS) $(INC_DIR) -c $< -o $@
 
 %.rel: %.s
-	$(AS) $(ASFLAGS) $<
+	@echo [AS] $(notdir $<)
+	@$(AS) $(ASFLAGS) $<
 
-flash: $(TARGET)
-	./stm8flash -c stlinkv2 -p $(MCU) -w $(TARGET)
+%.ihx: $(OBJECTS)
+	@echo [LD] $(PROJECT_NAME).ihx
+	@$(CC) $(LD_FLAGS) $(OBJECTS) -o $@
 
+flash: $(PROJECT_NAME).ihx
+	./stm8flash -c stlinkv2 -p $(MCU) -w $(PROJECT_NAME).ihx
+	
 clean:
-	rm -f *.map *.asm *.rel *.ihx *.o *.sym *.lk *.lst *.rst *.cdb *.bin
-
-.PHONY: clean all flash
+	@echo [RM] OBJ
+	@-rm -rf $(OBJECTS)
+	@echo [RM] HEX
+	@-rm -rf $(PROJECT_NAME).ihx
+	@echo [RM] intermediate outputs
+	@-rm -rf $(OTHER_OUTPUTS)
+	@-rm -rf $(PROJECT_NAME).lk
+	@-rm -rf $(PROJECT_NAME).map	
+	@-rm -rf $(PROJECT_NAME).cdb	
