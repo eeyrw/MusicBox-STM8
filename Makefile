@@ -50,7 +50,7 @@ INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
 # run from Flash
 DEFS	 = $(DDEFS)
 
-OBJECTS  = $(ASM_SRC:.s=.rel) $(SRC:.c=.rel)
+OBJECTS  = $(SRC:.c=.rel) $(ASM_SRC:.s=.rel)
 OTHER_OUTPUTS += $(ASM_SRC:.s=.asm) $(SRC:.c=.asm)
 OTHER_OUTPUTS += $(ASM_SRC:.s=.lst) $(SRC:.c=.lst)
 OTHER_OUTPUTS += $(ASM_SRC:.s=.rst) $(SRC:.c=.rst)
