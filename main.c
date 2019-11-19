@@ -25,7 +25,7 @@ void timer_isr() __interrupt(TIM4_ISR)
 
 void uart1_isr() __interrupt(UART1_RXC_ISR)
 {
-	NoteOnAsm(&(mainPlayer.mainSynthesizer),UART1_DR&0b00111111);
+	NoteOnAsm(&(mainPlayer.mainSynthesizer), UART1_DR & 0b00111111);
 }
 
 void HardwareInit(void)
@@ -49,38 +49,34 @@ void HardwareInit(void)
 	TIM4_IER |= (1 << TIM4_IER_UIE); // Enable Update Interrupt
 	TIM4_CR1 |= (1 << TIM4_CR1_CEN); // Enable TIM4
 
+	TIM2_CCMR3 |= 0X70; //设置定时器2三通道(PD2)输出比较三模式
+	TIM2_CCMR3 |= 0X04; //输出比较3预装载使能
 
-    TIM2_CCMR3 |=   0X70;   //设置定时器2三通道(PD2)输出比较三模式
-    TIM2_CCMR3 |= 0X04;     //输出比较3预装载使能
+	TIM2_CCMR2 |= 0X70; //设置定时器2二通道(PD3)输出比较三模式
+	TIM2_CCMR2 |= 0X04; //输出比较3预装载使能
 
+	TIM2_CCER1 |= (0x03 << 4); //通道2使能，低电平有效，配置为输出
+	TIM2_CCER2 |= 0x03;		   //通道3使能，低电平有效，配置为输出
 
-    TIM2_CCMR2 |=   0X70;   //设置定时器2二通道(PD3)输出比较三模式
-    TIM2_CCMR2 |= 0X04;     //输出比较3预装载使能
+	//初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
+	TIM2_PSCR = 0X00;
+	//初始化自动装载寄存器，决定PWM 方波的频率，Fpwm=0.125M/62500=2HZ
+	TIM2_ARRH = 0;
+	TIM2_ARRL = 0xFF;
+	//初始化比较寄存器，决定PWM 方波的占空比：5000/10000 = 50%
+	TIM2_CCR3H = 0;
+	TIM2_CCR3L = 122;
+	TIM2_CCR2H = 0;
+	TIM2_CCR2L = 123;
 
+	// 启动计数;更新中断失能
 
-    TIM2_CCER1 |= (0x03<<4);     //通道2使能，低电平有效，配置为输出
-	TIM2_CCER2 |= 0x03;     //通道3使能，低电平有效，配置为输出
-
-    //初始化时钟分频器为1，即计数器的时钟频率为Fmaster=8M/64=0.125MHZ
-    TIM2_PSCR = 0X00;   
-    //初始化自动装载寄存器，决定PWM 方波的频率，Fpwm=0.125M/62500=2HZ
-    TIM2_ARRH = 0;
-    TIM2_ARRL = 0xFF;
-    //初始化比较寄存器，决定PWM 方波的占空比：5000/10000 = 50%
-    TIM2_CCR3H = 0;
-    TIM2_CCR3L = 122;
-    TIM2_CCR2H = 0;
-    TIM2_CCR2L = 123;
-
-    // 启动计数;更新中断失能
-
-    TIM2_IER = 0x00; 
+	TIM2_IER = 0x00;
 	TIM2_CR1 |= 0x81;
 
-	PD_DDR |=(1<<2|1<<3);
-	PD_CR1 |=(1<<2|1<<3);
+	PD_DDR |= (1 << 2 | 1 << 3);
+	PD_CR1 |= (1 << 2 | 1 << 3);
 	enable_interrupts();
-	
 }
 
 void main()

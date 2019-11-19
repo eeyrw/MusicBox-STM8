@@ -17,9 +17,8 @@ void Player32kProc(Player *player)
 
 void PlayerProcess(Player *player)
 {
-
     uint8_t temp;
-    
+
     if (player->decayGenTick >= 150)
     {
         GenDecayEnvlopeAsm(&(player->mainSynthesizer));
@@ -27,7 +26,7 @@ void PlayerProcess(Player *player)
     }
     if (player->status == STATUS_PLAYING)
     {
-        if(PlayNoteTimingCheck(player))
+        if (PlayNoteTimingCheck(player))
         {
             do
             {
