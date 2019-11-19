@@ -13,7 +13,7 @@ MCU          = stm8s103f3
 ARCH = stm8
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
-PROJECT_NAME=FreeRTOS
+PROJECT_NAME=MUSIC-BOX-STM8
 
 # specify define
 DDEFS       =
