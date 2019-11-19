@@ -105,7 +105,7 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
         cFile.write("};\n\n")
         cFile.write("const uint16_t %s_Increment[]={\n"%waveTableIdentifer)
         newLineCounter=0
-        for i in range(57,120):
+        for i in range(0,128):
             cFile.write("%6d,"%(calcIncrement(freq,noteToFreq(i))*255))
             if newLineCounter>8:
                 newLineCounter=0
@@ -117,13 +117,12 @@ def exportToSourceFile(sampleName,attackSamples,loopSamples,freq,fileDir,sampleW
 
 
 def main():
-    sampleName="Celesta_C6"
+    sampleName="Celesta_C5"
     attackSamples=readWaveSamples("./WaveTableUtils/%s_ATTACK.wav"%sampleName)	
     loopSamples=readWaveSamples("./WaveTableUtils/%s_LOOP.wav"%sampleName)
     sampleFreq=estimateSampleFreq(attackSamples,32000)
     print("Estimated base frequency:%f Hz"%sampleFreq)
     exportToSourceFile(sampleName,attackSamples,loopSamples,sampleFreq,'./WaveTableUtils/',1)
-    estimateSampleFreq(attackSamples,32000)
     
 if __name__ == "__main__":
 	main()
