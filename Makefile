@@ -43,7 +43,7 @@ SRC 	+= $(LIBDIR)/uart.c
 ASM_SRC   += PeriodTimer.s
 ASM_SRC   += PlayerUtil.s
 ASM_SRC   += SynthCoreAsm.s
-
+ASM_SRC   += ramfunc.s
 
 INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
 
@@ -66,13 +66,13 @@ LD_FLAGS = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
 #
 # makefile rules
 #
-all: $(OBJECTS) $(PROJECT_NAME).ihx $(PROJECT_NAME).hex $(PROJECT_NAME).bin
+all: $(OBJECTS) $(PROJECT_NAME).ihx $(PROJECT_NAME).hex
 
 %.rel: %.c Makefile
 	@echo [CC] $(notdir $<)
 	@$(CC) $(CFLAGS) $(INC_DIR) -c $< -o $@
 
-%.rel: %.s
+%.rel: %.s  *.inc
 	@echo [AS] $(notdir $<)
 	@$(AS) $(ASFLAGS) $<
 

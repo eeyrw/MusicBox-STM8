@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "EnvelopeTable.h"
 
-#define POLY_NUM 6
+#define POLY_NUM 2
 #define DECAY_TIME_FACTOR 150
 
 

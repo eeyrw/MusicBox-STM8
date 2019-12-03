@@ -5,7 +5,7 @@
 ; ======== Global function ========
 .globl _timer_isr
 
-.area CODE
+.area RAM_SEG
 _timer_isr:
 ;	TIM4_SR &= ~(1 << TIM4_SR_UIF);
 	bres	21316, #0
