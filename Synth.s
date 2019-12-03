@@ -40,16 +40,14 @@ pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 ENVELOP_LEN=256
 POLY_NUM=5
-WAVETABLE_CELESTA_C5_ATTACK_LEN=1998
-WAVETABLE_CELESTA_C5_LEN=2608
-WAVETABLE_CELESTA_C5_LOOP_LEN=(WAVETABLE_CELESTA_C5_LEN - WAVETABLE_CELESTA_C5_ATTACK_LEN)
+
 
 
 REG_TIM2_CCR2L=0x314+0x5000;
 REG_TIM2_CCR3L=0x316+0x5000;
 .area DATA
 
-.area CODE
+.area RAM_SEG
 
 _SynthAsm:
 
@@ -73,7 +71,7 @@ loopSynth$:
 ; loop body
 		ldw x,y
 		ldw x,(pWavetablePos_int_h,x)	; Get a sample by pWavetablePos_int and save to a
-		ld a,(_WaveTable_Celesta_C5,x)
+		ld a,(_WaveTable,x)
 		ld (pSampleVal,y),a
 
 		ld a,(pEnvelopeLevel,y); Load evnvlopelevel to xl
@@ -117,9 +115,9 @@ loopSynth$:
 		ld xh,a   ; Let X hold value of integer part of wavetablePos
 
 	branch0_start$:
-		cpw x,#WAVETABLE_CELESTA_C5_LEN 	; Compare x (wavetablePos) with WAVETABLE_CELESTA_C5_LEN C=1 when WAVETABLE_CELESTA_C5_LEN>x
-		jrc branch0_end$			; Jump if WAVETABLE_CELESTA_C5_LEN is great than x
-		subw x,#WAVETABLE_CELESTA_C5_LOOP_LEN ; Subtract x with WAVETABLE_CELESTA_C5_LOOP_LEN
+		cpw x,#WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
+		jrc branch0_end$			; Jump if WAVETABLE_LEN is great than x
+		subw x,#WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
 	branch0_end$:
 		ldw (pWavetablePos_int_h,y),x ;
 						
@@ -152,6 +150,7 @@ branch_lt_gt_end$:
 
 	ret
 
+.area CODE
 _GenDecayEnvlopeAsm:
 	clr a				; Register A as loop index.
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
@@ -164,7 +163,7 @@ loopGenDecayEnvlope$:
 	;    SoundUnitUnion* soundUnionList=&(synth->SoundUnitUnionList[0]);
 	;	for (uint8_t i = 0; i < POLY_NUM; i++)
 	;	{
-	;		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_CELESTA_C5_ATTACK_LEN &&
+	;		if(soundUnionList[i].combine.wavetablePos_int >= WAVETABLE_ATTACK_LEN &&
 	;				soundUnionList[i].combine.envelopePos < sizeof(EnvelopeTable)-1)
 	;		{
 	;			soundUnionList[i].combine.envelopeLevel = EnvelopeTable[soundUnionList[i].combine.envelopePos];
@@ -174,7 +173,7 @@ loopGenDecayEnvlope$:
 
 	ldw x,y
 	ldw x,(pWavetablePos_int_h,x)
-	cpw x,#WAVETABLE_CELESTA_C5_ATTACK_LEN
+	cpw x,#WAVETABLE_ATTACK_LEN
 	jrc envelopUpdateEnd$
 	ld a,(pEnvelopePos,y)
 	cp a,#(ENVELOP_LEN-1)
@@ -227,7 +226,7 @@ _NoteOnAsm:
 	clrw x
 	ld xl,a
 	sim ;disable interrupt
-	ldw x,(_WaveTable_Celesta_C5_Increment,x)
+	ldw x,(_WaveTable_Increment,x)
 	ldw (pIncrement_int,y),x
 	clr (pWavetablePos_frac,y)
 	clr (pWavetablePos_int_h,y)

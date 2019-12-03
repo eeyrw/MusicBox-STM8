@@ -34,14 +34,15 @@ SRC 	+= AlgorithmTest.c
 SRC 	+= SynthCore.c
 SRC 	+= Player.c
 SRC 	+= UartRedirect.c
-SRC 	+= WaveTable_Celesta_C5.c
+SRC 	+= WaveTable.c
 SRC 	+= EnvelopTable.c
 SRC 	+= score.c
 SRC 	+= $(LIBDIR)/delay.c
 SRC 	+= $(LIBDIR)/uart.c
 
+ASM_SRC   += PeriodTimer.s
 ASM_SRC   += PlayerUtil.s
-ASM_SRC   += Synth.s
+ASM_SRC   += SynthCoreAsm.s
 
 
 INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
