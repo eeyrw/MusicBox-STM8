@@ -9,7 +9,7 @@ _decayGenTick::
 	.ds 1
 _currentTick::
 	.ds 4
-	
+.area CODE	
 _UpdateTick:
 ;     currentTick++;
 ;     if(decayGenTick<200)

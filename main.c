@@ -17,15 +17,15 @@ extern void TestProcess(void);
 extern const unsigned char Score[];
 
 Player mainPlayer;
-//extern void timer_isr() __interrupt(TIM4_ISR);
+extern void timer_isr() __interrupt(TIM4_ISR);
 
-void timer4_isr() __interrupt(TIM4_ISR)
-{
-	TIM4_SR &= ~(1 << TIM4_SR_UIF);
-	MEASURE_S;
-	//Player32kProc(&mainPlayer);
-	MEASURE_E;
-}
+// void timer4_isr() __interrupt(TIM4_ISR)
+// {
+// 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
+// 	MEASURE_S;
+// 	//Player32kProc(&mainPlayer);
+// 	MEASURE_E;
+// }
 
 void uart1_isr() __interrupt(UART1_RXC_ISR)
 {
