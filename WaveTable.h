@@ -1,5 +1,6 @@
 #ifndef __WAVETABLE__
 #define __WAVETABLE__
+
 // Sample's base frequency: 523.629906 Hz
 // Sample's sample rate: 32000 Hz
 
