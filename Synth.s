@@ -40,16 +40,14 @@ pLastSoundUnit=SoundUnitSize*POLY_NUM+2
 
 ENVELOP_LEN=256
 POLY_NUM=5
-WAVETABLE_ATTACK_LEN=1998
-WAVETABLE_LEN=2608
-WAVETABLE_LOOP_LEN=(WAVETABLE_LEN - WAVETABLE_ATTACK_LEN)
+
 
 
 REG_TIM2_CCR2L=0x314+0x5000;
 REG_TIM2_CCR3L=0x316+0x5000;
 .area DATA
 
-.area CODE
+.area RAM_SEG
 
 _SynthAsm:
 
@@ -152,6 +150,7 @@ branch_lt_gt_end$:
 
 	ret
 
+.area CODE
 _GenDecayEnvlopeAsm:
 	clr a				; Register A as loop index.
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.

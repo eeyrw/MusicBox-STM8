@@ -6,26 +6,30 @@
 #include <delay.h>
 #include "Player.h"
 
+#define RUN_FUNC_MAX_SIZE_256
+
 #define OUTPUT_PIN 5
 
 #define MEASURE_S PB_ODR |= (1 << OUTPUT_PIN)
 #define MEASURE_E PB_ODR &= ~(1 << OUTPUT_PIN)
 
 extern void TestProcess(void);
+extern const unsigned char Score[];
 
 Player mainPlayer;
+extern void timer_isr() __interrupt(TIM4_ISR);
 
-void timer_isr() __interrupt(TIM4_ISR)
-{
-	TIM4_SR &= ~(1 << TIM4_SR_UIF);
-	MEASURE_S;
-	Player32kProc(&mainPlayer);
-	MEASURE_E;
-}
+// void timer4_isr() __interrupt(TIM4_ISR)
+// {
+// 	TIM4_SR &= ~(1 << TIM4_SR_UIF);
+// 	MEASURE_S;
+// 	//Player32kProc(&mainPlayer);
+// 	MEASURE_E;
+// }
 
 void uart1_isr() __interrupt(UART1_RXC_ISR)
 {
-	NoteOnAsm(&(mainPlayer.mainSynthesizer), UART1_DR & 0b00111111);
+	NoteOnAsm(UART1_DR & 0b00111111);
 }
 
 void HardwareInit(void)
@@ -79,12 +83,40 @@ void HardwareInit(void)
 	enable_interrupts();
 }
 
+// #ifdef RUN_FUNC_MAX_SIZE_256
+// uint8_t f_ram[256];
+// volatile uint8_t RAM_SEG_LEN;
+// inline void get_ram_section_length() {
+    // __asm__("mov _RAM_SEG_LEN, #l_RAM_SEG");
+// }
+// #else
+// uint8_t f_ram[512];
+// volatile uint16_t RAM_SEG_LEN;
+// inline void get_ram_section_length() {
+    // __asm
+        // pushw x
+        // ldw x, #l_RAM_SEG
+        // ldw _RAM_SEG_LEN, x
+        // popw x
+    // __endasm;
+// }
+// #endif
+
+
+// void ram_cpy() {
+    // get_ram_section_length();
+    // for (uint8_t i = 0; i < RAM_SEG_LEN; i++)
+        // f_ram[i] = ((uint8_t *) SynthAsm)[i];
+    // ram_SynthAsm = (void (*)(const char *)) &f_ram;
+// }
+
 void main()
 {
-	PlayerInit(&mainPlayer);
+	//ram_cpy();
+	PlayerInit(&mainPlayer,&synthForAsm);
 	HardwareInit();
 #ifndef RUN_TEST
-	PlayerPlay(&mainPlayer);
+	PlayerPlay(&mainPlayer,Score);
 #else
 	TestProcess();
 #endif
