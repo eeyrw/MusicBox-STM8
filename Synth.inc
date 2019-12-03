@@ -6,11 +6,9 @@ _SynthAsm:
 	; The stack layout is:
 	; (0x01,sp)=mixOut
 	; (0x03,sp)=loop index
-	; (0x04,sp)=PCH
-	; (0x05,sp)=PCL
-	; (0x06,sp)=synthesizer object's address.
+	; _synthForAsm=synthesizer object's address.
 	
-	ldw y,(0x06, sp) 	; Load sound unit pointer to register Y.
+	ldw y,#_synthForAsm 	; Load sound unit pointer to register Y.
 
 loopSynth$:
 	ld a,(0x03,sp)
@@ -24,9 +22,7 @@ loopSynth$:
 
 		ld a,(pEnvelopeLevel,y); Load evnvlopelevel to xl
 		ld xl,a
-		ld a,(pSampleVal,y)
-
-		tnz a				; Test if a<0
+		ld a,(pSampleVal,y) ; Z bit will be updated.
 		jrmi branch1_end$	; Do signed mutiple with unsigned MUL
 		mul x,a
 		swapw x				; Div with 0xFF
@@ -74,9 +70,8 @@ loopSynth$:
     jra loopSynth$
 
 loopSynth_end$:
-	ldw y,(0x06, sp) 
 	ldw x,(0x01,sp)
-	ldw (pMixOut,y),x
+	ldw _synthForAsm+pMixOut,x
 	;sraw x
 	cpw x,#253
 	jrslt branch_lt_253$

@@ -7,7 +7,7 @@
 .area CODE
 _GenDecayEnvlopeAsm:
 	clr a				; Register A as loop index.
-	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
+	ldw y,#_synthForAsm  		; Load sound unit pointer to register Y.#_synthForAsm is synthesizer object's address.
 loopGenDecayEnvlope$:
     cp a,#POLY_NUM
     jreq loopGenDecayEnvlope_end$
@@ -50,7 +50,7 @@ loopGenDecayEnvlope_end$:
 ret
 
 _NoteOnAsm:
-	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is synthesizer object's address.
+	ldw y,#_synthForAsm  		; Load sound unit pointer to register Y. #_synthForAsm is synthesizer object's address.
 	;void NoteOn(Synthesizer* synth,uint8_t note)
 	;{
 	;	uint8_t lastSoundUnit = synth->lastSoundUnit;
@@ -73,9 +73,9 @@ _NoteOnAsm:
 	ldw x,#SoundUnitSize
 	ld a,(pLastSoundUnit,y)
 	mul x,a
-	addw x,(0x03, sp)
+	addw x,#_synthForAsm 
 	ldw y,x
-	ld a,(0x05, sp) ;uint8_t note
+	ld a,(0x03, sp) ;uint8_t note
 	sla a ;note*=2 and drop bit7
 	clrw x
 	ld xl,a
@@ -90,7 +90,7 @@ _NoteOnAsm:
 	ld (pEnvelopeLevel,y),a
 	rim ;enable interrput
 
-	ldw y,(0x03, sp)
+	ldw y,#_synthForAsm 
 	ld a,(pLastSoundUnit,y)
 	inc a
 	cp a,#POLY_NUM

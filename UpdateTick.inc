@@ -15,15 +15,15 @@ _UpdateTick:
 ;     if(decayGenTick<200)
 ;         decayGenTick+=1;
 ; }
-    ldw x,_currentTick+3
+    ldw x,_currentTick+2
     addw x,#1
-    ldw _currentTick+3,x
+    ldw _currentTick+2,x
     ld a,_currentTick+1
     adc a,#0
     ld _currentTick+1,a
-    ld a,_currentTick+2
+    ld a,_currentTick+0
     adc a,#0
-    ld _currentTick+2,a
+    ld _currentTick+0,a
 
     ld a,_decayGenTick
     cp a,#DECAY_TIME_FACTOR

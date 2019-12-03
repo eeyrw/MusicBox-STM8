@@ -12,14 +12,14 @@
 .area CODE
 
 _PlayNoteTimingCheck:
-;if((player->currentTick>>8)>=player->lastScoreTick)
+;if((currentTick>>8)>=player->lastScoreTick)
 	ldw y,(0x03, sp) 		; Load sound unit pointer to register Y. (0x03, sp) is player object's address.
     ld a,(pLastScoreTick_b2,y)
-    cp a,(pCurrentTick_b3,y) ;Set flag C is (pCurrentTick_b3,y)>(pLastScoreTick_b2,y)
+    cp a,_currentTick+0 ;Set flag C is (pCurrentTick_b3,y)>(pLastScoreTick_b2,y)
     jrc playNoteTimingCheckEndReturnTrue$
     ldw x,y
     ldw x,(pLastScoreTick_b1,x)
-    cpw x,(pCurrentTick_b2,y)
+    cpw x,_currentTick+1
     jrc playNoteTimingCheckEndReturnTrue$
     clr a
     ret
