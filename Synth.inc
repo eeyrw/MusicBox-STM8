@@ -59,9 +59,9 @@ loopSynth$:
 		ld xh,a   ; Let X hold value of integer part of wavetablePos
 
 	branch0_start$:
-		cpw x,#WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
+		cpw x,_WAVETABLE_LEN 	; Compare x (wavetablePos) with WAVETABLE_LEN C=1 when WAVETABLE_LEN>x
 		jrc branch0_end$			; Jump if WAVETABLE_LEN is great than x
-		subw x,#WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
+		subw x,_WAVETABLE_LOOP_LEN ; Subtract x with WAVETABLE_LOOP_LEN
 	branch0_end$:
 		ldw (pWavetablePos_int_h,y),x ;
 						

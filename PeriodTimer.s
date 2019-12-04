@@ -1,6 +1,5 @@
 .include "SynthCore.inc"
 .include "STM8.inc"
-.include "WaveTable.inc"
 .module PERIOD_TIMER
 ; ======== Global function ========
 .globl _timer_isr

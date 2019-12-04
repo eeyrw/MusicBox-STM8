@@ -1,6 +1,5 @@
 .module SYNTH_CORE_ASM
 .include "SynthCore.inc"
-.include "WaveTable.inc"
 .globl _GenDecayEnvlopeAsm
 .globl _NoteOnAsm
 
@@ -27,7 +26,7 @@ loopGenDecayEnvlope$:
 
 	ldw x,y
 	ldw x,(pWavetablePos_int_h,x)
-	cpw x,#WAVETABLE_ATTACK_LEN
+	cpw x,_WAVETABLE_ATTACK_LEN
 	jrc envelopUpdateEnd$
 	ld a,(pEnvelopePos,y)
 	cp a,#(ENVELOP_LEN-1)
