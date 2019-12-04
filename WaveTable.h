@@ -1,7 +1,7 @@
 #ifndef __WAVETABLE__
 #define __WAVETABLE__
-// Sample name: Xylophone C5
-// Sample's base frequency: 522.0361701697199 Hz
+// Sample name: Celesta C5 Mini
+// Sample's base frequency: 524.9773498620826 Hz
 // Sample's sample rate: 32000 Hz
 
 #include <stdint.h>
