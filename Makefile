@@ -49,7 +49,7 @@ INC_DIR  = $(patsubst %, -I%, $(INCLUDE_DIRS))
 
 # run from Flash
 DEFS	 = $(DDEFS)
-
+DEPS  = $(SRC:.c=.d)
 OBJECTS  = $(SRC:.c=.rel) $(ASM_SRC:.s=.rel)
 OTHER_OUTPUTS += $(ASM_SRC:.s=.asm) $(SRC:.c=.asm)
 OTHER_OUTPUTS += $(ASM_SRC:.s=.lst) $(SRC:.c=.lst)
@@ -68,9 +68,30 @@ LD_FLAGS = -m$(ARCH) -l$(ARCH) --out-fmt-ihx
 #
 all: $(OBJECTS) $(PROJECT_NAME).ihx $(PROJECT_NAME).hex $(PROJECT_NAME).bin
 
+# Don't delete dependency files
+.PRECIOUS: %.d
+
+# Don't rebuild deps if cleaning
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEPS)
+# Beacuse SDCC's assembler has no way to auto output dependency info,
+# the dependency is manually written here.	
+PeriodTimer.rel: SynthCore.inc STM8.inc Synth.inc UpdateTick.inc
+SynthCoreAsm.rel: SynthCore.inc
+PlayerUtil.rel: SynthCore.inc Player.inc
+endif
+
+
+
+
 %.rel: %.c Makefile
 	@echo [CC] $(notdir $<)
+# Output dependency
+	@$(CC) $(CFLAGS) $(INC_DIR) -MM -c $< > $(patsubst %.c,%.d,$<)
+# Do compiling
 	@$(CC) $(CFLAGS) $(INC_DIR) -c $< -o $@
+	
+
 
 %.rel: %.s
 	@echo [AS] $(notdir $<)
@@ -96,10 +117,11 @@ clean:
 	@-rm -rf $(OBJECTS)
 	@echo [RM] HEX
 	@-rm -rf $(PROJECT_NAME).ihx
-	@echo [RM] intermediate outputs
+	@echo [RM] Intermediate outputs
 	@-rm -rf $(OTHER_OUTPUTS)
 	@-rm -rf $(PROJECT_NAME).lk
 	@-rm -rf $(PROJECT_NAME).map	
 	@-rm -rf $(PROJECT_NAME).cdb	
 	@-rm -rf $(PROJECT_NAME).hex
 	@-rm -rf $(PROJECT_NAME).bin
+	@-rm -rf $(DEPS)
