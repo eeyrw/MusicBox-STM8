@@ -19,6 +19,7 @@ build
 *.ihx
 *.hex
 *.o
+*.d
 *.sym
 *.lk
 *.lst
